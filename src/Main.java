@@ -66,12 +66,18 @@ public class Main{
 		al2.add(new Location(9,1,-1,1));
 		al2.add(new Location(10,4,1,1));
 
-		al2.retainAll(al1);
+		ArrayList<Location> al3 = new ArrayList<>();
+		al3.add(new Location(8,2,2,1));
+		al3.add(new Location(9,1,-1,1));
+		al3.add(new Location(10,4,1,1));
+		System.out.println("al2 equals al3 is: "+al2.equals(al3));
+
+		//al2.retainAll(al1);
 		
-		System.out.println("al2 size is: "+al2.size()+"\n");
-		for(Location x: al2){
-			System.out.print(x.toString());
-		}
+		//System.out.println("al2 size is: "+al2.size()+"\n");
+		//for(Location x: al2){
+			//System.out.print(x.toString());
+		//}
 
 		
 		//KDTree tree = new KDTree();

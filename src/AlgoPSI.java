@@ -1,5 +1,10 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Iterator;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import com.google.common.hash.Hashing;
 import com.google.common.hash.HashCode;
@@ -7,7 +12,9 @@ import com.google.common.hash.HashFunction;
 import com.google.common.primitives.Ints;
 import org.streaminer.util.hash.*;
 public class AlgoPSI{
+	private int FLOCK_PATTERN_ID;
 	private static final int P_SIZE=1000;//mengatasi overhead kalau ukuran awal terlalu kecil
+	private int PRECISION=2;
 	private ArrayList<Flock> candidateFlocks;
 	//private invertedIndex;
 	private ArrayList<MinimumBoundingRectangle> activeBoxes;
@@ -18,6 +25,7 @@ public class AlgoPSI{
 	private int seedHash;
 	
 	public AlgoPSI(int minEntityNum,double distTreshold,int minTimeInstance,int seedHash){
+		this.FLOCK_PATTERN_ID = 1;
 		this.minEntityNum=minEntityNum;
 		this.distTreshold=distTreshold;
 		this.minTimeInstance=minTimeInstance;
@@ -172,6 +180,11 @@ public class AlgoPSI{
 		//Buat dua buah flock
 		//setiap flock punya signature -> dihitung dari ID_Entitas
 		//artinya setiap nambahin satu 'titik' ke flock -> hitung binary signature.
+		xc1 = this.roundValue(xc1);
+		yc1 = this.roundValue(yc1);
+
+		xc2= this.roundValue(xc2);
+		yc2= this.roundValue(yc2);
 		result[0]=new Flock(Hasher.getInstance(this.seedHash),timestamp,flockRadius,xc1,yc1);
 		result[1]=new Flock(Hasher.getInstance(this.seedHash),timestamp,flockRadius,xc2,yc2);
 		CircularRegion q1 = new CircularRegion(xc1,yc1);
@@ -186,7 +199,10 @@ public class AlgoPSI{
 		return result;
 	}
 
-	
+	private double roundValue(double input){
+		BigDecimal bd = new BigDecimal(input).setScale(this.PRECISION, RoundingMode.HALF_EVEN);
+     	return bd.doubleValue();
+	}
 	/**
 	* Hapus flock-flock yang membentuk subset dengan flock lain di dalam MBR pada waktu tertentu.
 	**/
@@ -238,13 +254,12 @@ public class AlgoPSI{
 	//1 -> flock1,flock2,flock 3
 	//2 -> flock2,flock3
 	//3 -> flock1,flock3
-	//dst...
-	//tapi list flock yg dipake udah di pisahin dari subset atau superset (hasil dari algoritma 2)
+
 	/**
 	* Gabungkan flock-flock pada waktu sebelumnya dengan flock pada waktu saat ini
 	* @param flockPatterns variabel reference
 	**/
-	public void joinTwoFlock(HashMap<FlockPattern> flockPatterns,int prevTime,ArrayList<Flock> prevFlocks,int currTime,ArrayList<Flock> currFlocks){
+	public void joinFlock(HashMap<Integer,FlockPattern> flockPatterns,int currTime,ArrayList<Flock> currFlocks){
 		//
 		HashMap<Integer,ArrayList<Flock>> invertedIndex;
 		
@@ -252,37 +267,113 @@ public class AlgoPSI{
 		//yang penting memenuhi syarat MINIMAL \delta buah timestamp YANG BERUNTUN (tidak putus ditengah-tengah).
 		
 		//kasus khusus flock pada waktu pertama banget
-		if(prevTime<0&&prevFlocks==null){
+		if(flockPatterns.isEmpty()){
 			//instansiasi bagian awal dari flock pattern nya
 			for(Flock f: currFlocks){
 				//satu flock-> satu pattern yg berbeda
-				
-				//antara buat baru atau ambil dari list
-				FlockPattern flockPattern = new FlockPattern();
-				flockPattern.addFlock(f);
+				this.addNewFlockPattern(flockPatterns,f,currTime);
 			}
-			
-			
 		}else{
-			invertedIndex=this.buildInvertedIndex(prevFlocks);
+			//inverted index pada waktu sebelumnya
+			invertedIndex=this.buildInvertedIndex(flockPatterns);
+
+			//untuk setiap flock pada waktu saat ini...
 			for(int i=0;i<currFlocks.size();i++){
 				Flock curr = currFlocks.get(i);
-				for(Location loc: curr.getAllLocation()){//iterasi setiap 'titik' pada flock-flock saaat ini
-					
-					//kuerikan setiap id benda pada flock curr
+				boolean noMatch = true;
+
+				//udah ga tau lagi harus pake nama apa
+				//untuk menyimpan flock hasil kueri (flock pada waktu sblmnya)
+				HashSet<Flock> s1 = new HashSet<>();//untuk semuanya
+				HashSet<Flock> s2 = new HashSet<>();//untuk per satu 'titik'
+
+				//iterasi setiap 'titik' pada flock-flock saaat ini
+				for(Location loc: curr.getAllLocation()){
+					s2.clear();
+					//kuerikan setiap id benda ke inverted index
+					//cari flock pada waktu sebelumnya yang mencakup id entitas
 					ArrayList<Flock> flocks=invertedIndex.get(loc.getEntityID());
-					
-					//periksa join condition
+					if(flocks==null){
+						//kalau nggak ada id entitas di flock sebelumnya
+						continue;
+					}
+					//periksa join condition pada setiap flock hasil kueri
 					for(Flock f: flocks){
-						int similar=curr.countEntityIDIntersection(f);
+						int similar=curr.countEntityIDIntersection(f).size();
 						if(similar>=this.minEntityNum){
-							//ga hanya jumlah entitas yang sama yang harus di periksa.
-							//gabungkan dgn flock sebelumnya....
+							s2.add(f);//Perhatikan method equals() dan hashCode() di kelas Flock
 						}
+					}
+
+					if(s1.isEmpty()){
+						//Perhatikan method equals() dan hashCode() di kelas Flock
+						s1.addAll(s2);
+					}else{
+						//Perhatikan method equals() dan hashCode() di kelas Flock
+						s1.retainAll(s2);
+					}
+				}
+
+				//untuk setiap flock pada wkt sebelumnya 
+				//yang memenuhi syarat n elemen yang sama dengan flock saat ini
+				if(!s1.isEmpty()){
+					//iterasi flock hasil kueri (flock pada waktu sebelumnya)
+					Iterator<Flock> iter = s1.iterator();
+					while(iter.hasNext()){
+						//qf itu singkatan dari 'query flock'
+						Flock qf=iter.next();
+
+						int patternID = qf.getPatternID();
+						//anggap patternID nggak nol
+						FlockPattern fp=flockPatterns.get(patternID);
+
+						//tambahkan flock saat ini ke dalam flock pattern yang sudah ada
+						fp.addFlock(curr);
 					}
 				}
 			}
 		}
+	}
+
+	private void addNewFlockPattern(HashMap<Integer,FlockPattern> list,Flock flock,int timestamp){
+		FlockPattern flockPattern = new FlockPattern(this.FLOCK_PATTERN_ID,timestamp);
+		flockPattern.addFlock(flock);
+		list.put(this.FLOCK_PATTERN_ID,flockPattern);
+		this.FLOCK_PATTERN_ID++;
+	}
+
+	//array list-> urutan di array itu sesuai urutan masuk nya
+	/**
+	* Cari flock pattern yang 'ujung' nya berada di time stamp saat ini
+	* @param timestamp waktu saat inverted index dibuat
+	* @param flockPatterns flock pattern
+	**/
+	private HashMap<Integer,ArrayList<Flock>> buildInvertedIndex(HashMap<Integer,FlockPattern> flockPatterns,int timestamp){
+		HashMap<Integer,ArrayList<Flock>> invertedIndex=new HashMap<>();		
+
+		Set<Integer> keySet = flockPatterns.keySet();
+		Iterator<Integer> iter = keySet.iterator();
+		while(iter.hasNext()){
+			FlockPattern curr = flockPatterns.get(iter.next());
+
+			Flock tail = curr.getLastFlock();
+			if(tail.getTimestamp()==timestamp){
+				//cari semua titik di dalam flock
+				ArrayList<Location> locs = tail.getAllLocation();
+				
+				//untuk setiap titik di dalam flock
+				for(int i=0;i<locs.size();i++){
+					Location currPoint = locs.get(i);
+					if(invertedIndex.get(currPoint.getEntityID())==null){
+						invertedIndex.put(currPoint.getEntityID(),new ArrayList<>());
+					}else{
+						invertedIndex.get(currPoint.getEntityID()).add(tail);
+					}
+				}
+			}
+			
+		}
+		return invertedIndex;
 	}
 	
 	//document: -> flock

@@ -5,7 +5,7 @@ import java.util.Objects;
 public class Location{
 	private Point2D position;
 	private int timestamp;
-	private int entityID;//karena dibutuhkan pada method countFlock di kelas AlgoPSI
+	private final int entityID;//karena dibutuhkan pada method countFlock di kelas AlgoPSI
 	
 	public Location(int entityID,double x,double y,int timestamp){
 		this.entityID=entityID;

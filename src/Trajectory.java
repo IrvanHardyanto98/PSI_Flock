@@ -2,7 +2,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 public class Trajectory{
 	private HashMap<Integer,Location> locations;
-	private int entityID;//ID ENTITAS TIDAK BOLEH BERUBAH DARI AWAL SAMPAI AKHIR!, karena Id_entitas setiap 'titik' harus diubah satu-satu
+	private final int entityID;//ID ENTITAS TIDAK BOLEH BERUBAH DARI AWAL SAMPAI AKHIR!, karena Id_entitas setiap 'titik' harus diubah satu-satu
 	private int startTime;
 	private int endTime;
 	
