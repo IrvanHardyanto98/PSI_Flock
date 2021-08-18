@@ -1,3 +1,5 @@
+package model;
+
 import java.util.Comparator;
 public class LocationComparatorX implements Comparator<Location>{
 	@Override

@@ -1,3 +1,5 @@
+package kdtree;
+import model.Location;
 /**
 * Kelas yang merepresentasikan algoritma Quickselect, yatiu algoritma yang
 * mencari elemen urutan k-terkecil pada kumpulan elemen yang tak terurut

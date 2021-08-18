@@ -1,42 +1,83 @@
 import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Scanner;
+import java.util.HashMap;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import model.Location;
+import model.Trajectory;
+
+//Asumsi yang dibuat (18-08-2021)
 public class Main{
-	
+	private static final int FIELD_NUM=4;
 	public static void main(String[] args){
+		Scanner sc = new Scanner(System.in);
+		System.out.println("PENCARIAN FLOCK PATTERN MENGGUNAKAN ALGORITMA PSI");
 		
-		//int[] array = new int[] { 10,50, 2,-20, 1, 15, 7,-3, 6,-1,1,1,1,1,1};
-		//int[] array2 = Arrays.copyOf(array,array.length);
-		//int k = 9;
+		int minEntityNum;
+		int minDuration;
+		double distTreshold;
+		System.out.println("Masukkan Parameter");
+		System.out.print("jumlah entitas minimal: ");
+		minEntityNum = sc.nextInt();
+		System.out.print("durasi minimal flock: ");
+		minDuration = sc.nextInt();
+		System.out.print("batasan jarak: ");
+		distTreshold = sc.nextDouble();
 		
+		ArrayList<Location> points = new ArrayList<>();
 		
+		while(true){
+			points.clear();
+			//baca input
+			//hitung flock
+			//kembalikan hasil patternya
+			System.out.print("Enter path to file: ");
+			String filePath = sc.nextLine();
+			File inputFile = new File(filePath);
 		
-		//int kval = QuickSelect.select(array,0,array.length-1,k);
-		
-		//Arrays.sort(array2);
-		//for(int loc: array2){
-			//System.out.print(loc+",");
-		//}
-		//System.out.println();
-		
-		//System.out.println("pivot value: "+kval);
-		//for(int loc: array){
-			//System.out.println(loc);
-		//}
-		//System.out.println();
-		try{
-		File file = new File("err.txt");
-		FileOutputStream fos = new FileOutputStream(file);
-		PrintStream ps = new PrintStream(fos);
-		System.setErr(ps);
-		}catch(Exception e){
+			try{
+			//file reader -> khusus file yang isinya teks
+			FileReader fr = new FileReader(inputFile);
+			BufferedReader br = new BufferedReader(fr);
 			
+			//untuk pesan error
+			File file = new File("err.txt");
+			FileOutputStream fos = new FileOutputStream(file);
+			PrintStream ps = new PrintStream(fos);
+			System.setErr(ps);
+			
+			//baca satu per satu
+			String line;
+			ArrayList<Trajectory> trajectories = new ArrayList<>();
+			while((line = br.readLine()) != null){
+				String[] s=line.split("\\,");
+				//pastikan split pas jadi 4
+				int entityID = Integer.parseInt(s[0]);
+				int timestamp = Integer.parseInt(s[1]);
+				double x = Double.parseDouble(s[2]);
+				double y = Double.parseDouble(s[3]);
+				//masalahnya -> cara nambahin 'titik' ke lintasan itu gimana?
+				//kalau pake arraylist-> id benda bisa ketukar
+				//pake array list contains() -> O(N) ga efektif.
+				
+				//kalau disimpan pake trajectory... kalo mau dapet 'titik' saat ini harus iterasi satu satu semuanya
+				//jsdi langsung disimpen dalam bentuk 'titik' (Location)
+				Location currentPoint = new Location(entityID, x, y, timestamp);
+				points.add(currentPoint);
+			}
+		}catch(FileNotFoundException e){
+			System.out.println("ERROR! file not found");
+		}catch(IOException e){
+			System.out.println("ERROR! could not read file");
 		}
-		
-		testCoord();
+		}
 	}
 	
 	public static void testCoord(){

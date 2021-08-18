@@ -1,7 +1,10 @@
+package model;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.BitSet;
 import java.awt.geom.Point2D;
+import java.util.Objects;
 
 //asumsi yang dibuat sejauh ini:
 //-tidak ada dua titik yang koordinat nya sama persis
@@ -30,7 +33,7 @@ public class Flock{
 	public Flock(Hasher hasher,int timestamp,double radius,double x,double y){
 		this.timestamp=timestamp;
 		this.radius=radius;
-		this.binarySignature=new BinarySignature(this.BITSTRING_LENGTH);//keyword new alokasi memori di heapSpace
+		this.binarySignature=new BitSet(this.BITSTRING_LENGTH);//keyword new alokasi memori di heapSpace
 		this.centerPoint = new Point2D.Double(x,y);
 		this.locations = new ArrayList<>();
 		this.entitiyIDSet = new HashSet<>();
@@ -51,15 +54,15 @@ public class Flock{
 		this.locations.add(loc);
 		long spookyHashVal = this.hasher.doSpookyHash(loc.getEntityID());
 		int murHashVal = this.hasher.doMurMurHash(loc.getEntityID());
-		this.binarySignature.set(spookyHashVal%this.BITSTRING_LENGTH);
+		this.binarySignature.set((int)(spookyHashVal%this.BITSTRING_LENGTH));
 		this.binarySignature.set(murHashVal%this.BITSTRING_LENGTH);
 	}
 	
 	public void countSignature(){
 		for(int i = 0 ;i<this.locations.size();i++){
-			long spookyHashVal = this.hasher.doSpookyHash(this.locations[i].getEntityID());
-			int murHashVal = this.hasher.doMurMurHash(this.locations[i].getEntityID());
-			this.binarySignature.set(spookyHashVal%this.BITSTRING_LENGTH);
+			long spookyHashVal = this.hasher.doSpookyHash(this.locations.get(i).getEntityID());
+			int murHashVal = this.hasher.doMurMurHash(this.locations.get(i).getEntityID());
+			this.binarySignature.set((int)(spookyHashVal%this.BITSTRING_LENGTH));
 			this.binarySignature.set(murHashVal%this.BITSTRING_LENGTH);
 		}
 	}
@@ -112,7 +115,8 @@ public class Flock{
 			l2 = new ArrayList<>(this.locations);
 		}
 		
-		return l1.retainAll(l2);
+		l1.retainAll(l2);
+                return l1;
 	}
 	
 	/**
@@ -136,7 +140,7 @@ public class Flock{
 	}
 	
 	public boolean isInFlock(Point2D pos){
-		double dist = Math.pow(pos.getX()-this.x,2)+Math.pow(pos.getY()-this.y,2);
+		double dist = Math.pow(pos.getX()-this.centerPoint.getX(),2)+Math.pow(pos.getY()-this.centerPoint.getY(),2);
 		double r_2 = this.radius*this.radius;
 		return dist < r_2;
 	}

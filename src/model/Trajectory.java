@@ -1,3 +1,5 @@
+package model;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 public class Trajectory{
@@ -6,21 +8,21 @@ public class Trajectory{
 	private int startTime;
 	private int endTime;
 	
-	public Trajectory(int entitiyID,int startTime,int endTime){
-		this.entitiyID=entitiyID;
+	public Trajectory(int entityID,int startTime){
+		this.entityID=entityID;
 		this.startTime=startTime;
-		this.endTime=endTime;
+		this.endTime=0;
 		this.locations=new HashMap<>();
 	}
 	
 	public void addLocation(double x,double y,int timestamp){
-		this.locations.put(timestamp,new Location(this.entitiyID,x,y,timestamp));
+		this.locations.put(timestamp,new Location(this.entityID,x,y,timestamp));
 	}
 	
 	public void addAllLocation(){
 		
 	}
-	public void getLocation(int timestamp){
+	public Location getLocation(int timestamp){
 		return this.locations.get(timestamp);
 	}
 }

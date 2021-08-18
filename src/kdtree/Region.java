@@ -1,3 +1,5 @@
+package kdtree;
+import model.Location;
 
 public interface Region{
 	public boolean containsPoint(Location loc);

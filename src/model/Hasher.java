@@ -1,3 +1,5 @@
+package model;
+
 import com.google.common.hash.Hashing;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
@@ -20,10 +22,10 @@ public class Hasher{
 	}
 	
 	public static Hasher getInstance(int seed){
-		if(this.instance==null){
-			this.instance = new Hasher(seed);
+		if(Hasher.instance==null){
+			Hasher.instance = new Hasher(seed);
 		}
-		return instance;
+		return Hasher.instance;
 	}
 	
 	public long doSpookyHash(int key){
@@ -31,7 +33,7 @@ public class Hasher{
 	}
 	
 	public int doMurMurHash(int key){
-		HashCode hashCode= mh3.hashInt(keyInt);
+		HashCode hashCode= mh3.hashInt(key);
 		return Ints.fromByteArray(hashCode.asBytes());
 	}
 }

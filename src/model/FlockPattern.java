@@ -1,3 +1,5 @@
+package model;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 /**
@@ -35,7 +37,7 @@ public class FlockPattern{
 	}
 
 	public void setEndTime(int endTime){
-		this.endTime;
+		this.endTime=endTime;
 	}
 
 	public int getID(){
