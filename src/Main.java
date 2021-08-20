@@ -8,8 +8,16 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.Set;
+import kdtree.CircularRegion;
+import kdtree.KDTree;
+import model.Flock;
+import model.FlockPattern;
 import model.Location;
 import model.Trajectory;
 
@@ -20,9 +28,10 @@ public class Main{
 		Scanner sc = new Scanner(System.in);
 		System.out.println("PENCARIAN FLOCK PATTERN MENGGUNAKAN ALGORITMA PSI");
 		
-		int minEntityNum;
-		int minDuration;
-		double distTreshold;
+		int minEntityNum=0;
+		int minDuration=0;
+		int seed=0;
+		double distTreshold=0.0;
 		System.out.println("Masukkan Parameter");
 		System.out.print("jumlah entitas minimal: ");
 		minEntityNum = sc.nextInt();
@@ -30,16 +39,24 @@ public class Main{
 		minDuration = sc.nextInt();
 		System.out.print("batasan jarak: ");
 		distTreshold = sc.nextDouble();
-		
-		ArrayList<Location> points = new ArrayList<>();
-		
-		while(true){
+		System.out.print("nilai seed: ");
+		seed = sc.nextInt();
+		sc.nextLine();
+		ArrayList<Location> points = new ArrayList<>(); 
+		AlgoPSI problemInstance = new AlgoPSI(minEntityNum,distTreshold,minDuration,seed);
+		int entityID;
+		int timestamp=0;
+		double x;
+		double y;
+		while(true){//kondisi berhenti masih belum kepikiran
 			points.clear();
 			//baca input
 			//hitung flock
 			//kembalikan hasil patternya
+			System.out.println("Pastikan Format setiap baris pada file input adalah:<id_entitas>,<waktu>,<koordinat-x>,<koordinat-Y>");
 			System.out.print("Enter path to file: ");
 			String filePath = sc.nextLine();
+			//String filePath = "t1_mini.txt";
 			File inputFile = new File(filePath);
 		
 			try{
@@ -47,11 +64,11 @@ public class Main{
 			FileReader fr = new FileReader(inputFile);
 			BufferedReader br = new BufferedReader(fr);
 			
-			//untuk pesan error
-			File file = new File("err.txt");
-			FileOutputStream fos = new FileOutputStream(file);
-			PrintStream ps = new PrintStream(fos);
-			System.setErr(ps);
+			//untuk pesan error (KALAU PAKE CMD)
+			//File file = new File("err.txt");
+			//FileOutputStream fos = new FileOutputStream(file);
+			//PrintStream ps = new PrintStream(fos);
+			//System.setErr(ps);
 			
 			//baca satu per satu
 			String line;
@@ -59,18 +76,48 @@ public class Main{
 			while((line = br.readLine()) != null){
 				String[] s=line.split("\\,");
 				//pastikan split pas jadi 4
-				int entityID = Integer.parseInt(s[0]);
-				int timestamp = Integer.parseInt(s[1]);
-				double x = Double.parseDouble(s[2]);
-				double y = Double.parseDouble(s[3]);
-				//masalahnya -> cara nambahin 'titik' ke lintasan itu gimana?
-				//kalau pake arraylist-> id benda bisa ketukar
-				//pake array list contains() -> O(N) ga efektif.
-				
-				//kalau disimpan pake trajectory... kalo mau dapet 'titik' saat ini harus iterasi satu satu semuanya
-				//jsdi langsung disimpen dalam bentuk 'titik' (Location)
+				entityID = Integer.parseInt(s[0]);
+				timestamp = Integer.parseInt(s[1]);
+				x = Double.parseDouble(s[2]);
+				y = Double.parseDouble(s[3]);
+
 				Location currentPoint = new Location(entityID, x, y, timestamp);
 				points.add(currentPoint);
+			}
+			long start=System.currentTimeMillis();
+			problemInstance.findAllFlockPattern(timestamp,points);
+			long end = System.currentTimeMillis();
+			System.out.println("durasi pencarian : "+(end-start)+" (milisekon)");
+			String outputFileName="flock_patterns.txt";
+			File outputFile = new File(outputFileName);
+			FileWriter fw = new FileWriter(outputFile,false);
+			BufferedWriter writer = new BufferedWriter(fw);
+				
+			writer.append("Flock pattern yang ditemukan: \n");
+			writer.append("\n");
+			writer.append("Parameter yang digunakan:\n");
+			writer.append("Jumlah entitas minimal: "+minEntityNum+"\n");
+			writer.append("Batasan jarak: "+distTreshold+"\n");
+			writer.append("Durasi flock minimal: "+minDuration+"\n");
+			writer.append("\n");
+			
+			System.out.print("hentikan program? Y/N: ");
+			String stat = sc.nextLine();
+			if(stat.equals("Y")){
+				HashMap<Integer,FlockPattern> patterns = problemInstance.getAllFlockPattern();
+				Set<Integer> keys = patterns.keySet();
+				Iterator<Integer> iter = keys.iterator();
+				while(iter.hasNext()){
+					FlockPattern p = patterns.get(iter.next());
+					writer.append(p.toString()+"\n");
+					writer.append("Flocks:\n");
+					for(Flock f: p.getAllFlock()){
+						writer.append(f.toString()+"\n");
+					}
+				}
+				writer.close();
+				System.out.println("output file is written at: ");
+				break;
 			}
 		}catch(FileNotFoundException e){
 			System.out.println("ERROR! file not found");

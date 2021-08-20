@@ -24,6 +24,7 @@ public class MinimumBoundingRectangle{
 		this.timestamp=timestamp;
 		this.p1=p1;
 		this.p2=p2;
+		this.flocks=new ArrayList<>();
 	}
 	
 	public Point2D getP1(){
@@ -61,5 +62,12 @@ public class MinimumBoundingRectangle{
 			return false;
 		}
 		return true;
+	}
+	
+	public String toString(){
+		String s="(x1,y1): ("+this.p1.getX()+","+this.p1.getY()+")\n";
+		s+="(x2,y2): ("+this.p2.getX()+","+this.p2.getY()+")\n";
+		s+="flocks in this box: "+this.flocks.size()+" flocks\n";
+		return s;
 	}
 }

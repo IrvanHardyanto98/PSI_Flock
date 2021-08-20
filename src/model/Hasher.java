@@ -32,8 +32,8 @@ public class Hasher{
 		return Integer.toUnsignedLong(sh.hash(Integer.toString(key).getBytes(),Integer.toString(key).getBytes().length,this.seed));
 	}
 	
-	public int doMurMurHash(int key){
+	public long doMurMurHash(int key){
 		HashCode hashCode= mh3.hashInt(key);
-		return Ints.fromByteArray(hashCode.asBytes());
+		return Integer.toUnsignedLong(Ints.fromByteArray(hashCode.asBytes()));
 	}
 }

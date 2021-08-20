@@ -48,4 +48,17 @@ public class FlockPattern{
 	public Flock getLastFlock(){
 		return this.flocks.get(this.flocks.size()-1);
 	}
+	
+	public ArrayList<Flock> getAllFlock(){
+		return this.flocks;
+	}
+	
+	@Override
+	public String toString(){
+		String s="ID: "+this.flockPatternID+"\n";
+		s+="start time: "+this.startTime+"\n";
+		s+="end time: "+this.endTime+"\n";
+		s+="flock num: "+this.flocks.size()+"\n";
+		return s;
+	}
 }

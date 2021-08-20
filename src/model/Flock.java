@@ -53,17 +53,17 @@ public class Flock{
 	public void addLocation(Location loc){
 		this.locations.add(loc);
 		long spookyHashVal = this.hasher.doSpookyHash(loc.getEntityID());
-		int murHashVal = this.hasher.doMurMurHash(loc.getEntityID());
+		long murHashVal = this.hasher.doMurMurHash(loc.getEntityID());
 		this.binarySignature.set((int)(spookyHashVal%this.BITSTRING_LENGTH));
-		this.binarySignature.set(murHashVal%this.BITSTRING_LENGTH);
+		this.binarySignature.set((int)(murHashVal%this.BITSTRING_LENGTH));
 	}
 	
 	public void countSignature(){
 		for(int i = 0 ;i<this.locations.size();i++){
 			long spookyHashVal = this.hasher.doSpookyHash(this.locations.get(i).getEntityID());
-			int murHashVal = this.hasher.doMurMurHash(this.locations.get(i).getEntityID());
+			long murHashVal = this.hasher.doMurMurHash(this.locations.get(i).getEntityID());
 			this.binarySignature.set((int)(spookyHashVal%this.BITSTRING_LENGTH));
-			this.binarySignature.set(murHashVal%this.BITSTRING_LENGTH);
+			this.binarySignature.set((int)(murHashVal%this.BITSTRING_LENGTH));
 		}
 	}
 	
@@ -154,6 +154,22 @@ public class Flock{
 
 	public int getTimestamp(){
 		return this.timestamp;
+	}
+	
+	@Override
+	public String toString(){
+		int n = 1;
+		String s="titik pusat flock: ("+this.centerPoint.getX()+","+this.centerPoint.getY()+")\n";
+		s+="jari-jari flock adalah: "+this.radius+"\n";
+		s+="jumlah titik pada flock: "+this.locations.size()+"\n";
+		for(Location loc: this.locations){
+			//s+="\n";
+			s+="Entitas ke-"+n+" :\n";
+			n++;
+			s+=loc.toString();
+			//s+="titik ("+loc.getX()+","+loc.getY()+")\n";
+		}
+		return s;
 	}
 
 	@Override

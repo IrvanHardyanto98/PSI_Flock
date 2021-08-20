@@ -96,18 +96,10 @@ public class KDTree{
 	private void DFSRec(Region region,ArrayList<Location> result,KDTreeNode currentNode,int depth){
 		if(currentNode!=null){
 			if(currentNode.left==null&&currentNode.right==null){
-				System.out.println("Testing point: "+currentNode.getX()+","+currentNode.getY());
 				if(region.containsPoint(currentNode.loc)){
-				System.out.println("ADDED point: "+currentNode.getX()+","+currentNode.getY());
 				result.add(currentNode.loc);
 				}
 			}else{
-				
-				//System.out.println("ADDED point: "+currentNode.getX()+","+currentNode.getY());
-				
-				
-				System.out.println("at node: "+currentNode.getX()+","+currentNode.getY()+" depth: "+depth);
-				
 			//subtree kiri atau bawah
 						
 				if(depth%2==0){//sumbu x
