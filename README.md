@@ -1,2 +1,13 @@
 # PSI_Flock
-Program Pencarian flock dengan menggunakan algoritma Plane Sweep, Binary Signature, dan Inverted Index
+Pencarian flock dengan menggunakan algoritma Plane Sweep, Binary Signature, dan Inverted Index. Dibuat sebagai syarat tugas akhir.
+
+# Referensi Utama
+Tanaka, P. S., Vieira, M. R., dan Kaster, D. S. (2016) An improved base algorithm for online discovery of flock patterns in trajectories. *Journal of Information and Data Management*, 7, 52–67
+
+# Kebutuhan Sistem
+Pastikan versi JDK/JRE yang terpasang minimal versi 8.0
+
+# *Library* Tambahan yang digunakan
+1. Library spooky hash (https://github.com/mayconbordin/streaminer)
+2. Library MurmurHash3, dari project Guava (https://github.com/google/guava)
+
