@@ -1,3 +1,5 @@
+package com.skripsi.psi_flock;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -13,8 +15,8 @@ import com.google.common.hash.Hashing;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.primitives.Ints;
-import model.*;
-import kdtree.*;
+import com.skripsi.psi_flock.model.*;
+import com.skripsi.psi_flock.kdtree.*;
 import org.streaminer.util.hash.*;
 public class AlgoPSI{
 	private int FLOCK_PATTERN_ID;
@@ -325,19 +327,22 @@ public class AlgoPSI{
 		}else{
 			//inverted index pada waktu sebelumnya
 			invertedIndex=this.buildInvertedIndex(flockPatterns,currTime-1);
+			HashSet<Flock> s1 = new HashSet<>();//untuk semuanya
+			HashSet<Flock> s2 = new HashSet<>();//untuk per satu 'titik'
 			//System.out.println(invertedIndex.toString());
 			//untuk setiap flock pada waktu saat ini...
 			for(int i=0;i<currFlocks.size();i++){
+				s1.clear();
 				Flock curr = currFlocks.get(i);
 				boolean noMatch = true;
 
 				//udah ga tau lagi harus pake nama apa
 				//untuk menyimpan flock hasil kueri (flock pada waktu sblmnya)
-				HashSet<Flock> s1 = new HashSet<>();//untuk semuanya
-				HashSet<Flock> s2 = new HashSet<>();//untuk per satu 'titik'
+				
 
 				//iterasi setiap 'titik' pada flock-flock saaat ini
-				for(Location loc: curr.getAllLocation()){
+				for(int j=0;j<curr.getAllLocation().size();j++){
+					Location loc = curr.getAllLocation().get(j);
 					s2.clear();
 					//kuerikan setiap id benda ke inverted index
 					//cari flock pada waktu sebelumnya yang mencakup id entitas
@@ -354,7 +359,7 @@ public class AlgoPSI{
 						}
 					}
 
-					if(s1.isEmpty()){
+					if(j==0){
 						//Perhatikan method equals() dan hashCode() di kelas Flock
 						s1.addAll(s2);
 					}else{
@@ -377,7 +382,13 @@ public class AlgoPSI{
 						FlockPattern fp=flockPatterns.get(patternID);
 
 						//tambahkan flock saat ini ke dalam flock pattern yang sudah ada
-						fp.addFlock(curr);
+						if(!fp.addFlock(curr)){
+							//artinya dia buat 'cabang' baru
+							FlockPattern newPattern=new FlockPattern(this.FLOCK_PATTERN_ID,fp.getStartTime(),fp.getAllFlock(),fp.getAllID());
+							newPattern.addFlock(curr);
+							flockPatterns.put(this.FLOCK_PATTERN_ID,newPattern);
+							this.FLOCK_PATTERN_ID++;
+						}
 					}
 				}
 			}

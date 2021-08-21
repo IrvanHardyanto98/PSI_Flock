@@ -1,4 +1,4 @@
-package model;
+package com.skripsi.psi_flock.model;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -22,14 +22,30 @@ public class FlockPattern{
 		this.entityIDList = new HashSet<>();
 	}
 	
+	public FlockPattern(int flockPatternID,int startTime,ArrayList<Flock> existingFlocks,HashSet<Integer> existingIDs){
+		this.startTime = startTime;
+		this.endTime = 0;
+		this.flockPatternID=flockPatternID;
+		this.flocks=new ArrayList<>(existingFlocks);
+		this.entityIDList = new HashSet<>(existingIDs);
+	}
+	
+	public HashSet<Integer> getAllID(){
+		return this.entityIDList;
+	}
+	
 	/**
 	* Tambahkan flock di posisi paling belakang, sesuai urutan waktu nya
 	**/
-	public void addFlock(Flock flock){
+	public boolean addFlock(Flock flock){
+		if(!this.flocks.isEmpty()&&flock.getTimestamp()==this.flocks.get(this.flocks.size()-1).getTimestamp()){
+			return false;
+		}
 		flock.setPatternID(this.flockPatternID);
 		this.flocks.add(flock);
 		//masih perlu diubah
 		//this.entityIDList.addAll(flock.getEntityIDSet());
+		return true;
 	}
 
 	public int getStartTime(){

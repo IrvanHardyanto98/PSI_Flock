@@ -1,4 +1,4 @@
-package model;
+package com.skripsi.psi_flock.model;
 
 import com.google.common.hash.Hashing;
 import com.google.common.hash.HashCode;

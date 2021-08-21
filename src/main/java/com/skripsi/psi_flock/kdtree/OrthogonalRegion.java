@@ -1,5 +1,5 @@
-package kdtree;
-import model.Location;
+package com.skripsi.psi_flock.kdtree;
+import com.skripsi.psi_flock.model.Location;
 /**
 * sebuah Region yang dibatasi oleh titik (x1,y1) di kiri bawah dan (x2,y2) di kanan atas
 * PENTING! saat instansiasi, pastikan x1 < x2 dan y1 < y2

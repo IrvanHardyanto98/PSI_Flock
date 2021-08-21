@@ -1,4 +1,4 @@
-package model;
+package com.skripsi.psi_flock.model;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;

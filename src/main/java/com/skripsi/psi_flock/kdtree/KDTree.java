@@ -1,11 +1,11 @@
-package kdtree;
+package com.skripsi.psi_flock.kdtree;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.TreeSet;
-import model.Location;
-import model.LocationComparatorX;
-import model.LocationComparatorY;
+import com.skripsi.psi_flock.model.Location;
+import com.skripsi.psi_flock.model.LocationComparatorX;
+import com.skripsi.psi_flock.model.LocationComparatorY;
 /**
 * Update 5 Agustus 2021: Masih ada masalah di Build Kd-Tree, kalau elemen yang dimasukin ada yang berulang,
 * Entah di sumbu X atau sumbu Y

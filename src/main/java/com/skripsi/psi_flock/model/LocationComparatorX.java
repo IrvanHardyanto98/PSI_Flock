@@ -1,4 +1,4 @@
-package model;
+package com.skripsi.psi_flock.model;
 
 import java.util.Comparator;
 public class LocationComparatorX implements Comparator<Location>{

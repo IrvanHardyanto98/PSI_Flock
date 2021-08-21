@@ -1,5 +1,5 @@
-package kdtree;
-import model.Location;
+package com.skripsi.psi_flock.kdtree;
+import com.skripsi.psi_flock.model.Location;
 
 public interface Region{
 	public boolean containsPoint(Location loc);

@@ -1,3 +1,4 @@
+package com.skripsi.psi_flock;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -14,12 +15,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
-import kdtree.CircularRegion;
-import kdtree.KDTree;
-import model.Flock;
-import model.FlockPattern;
-import model.Location;
-import model.Trajectory;
+import com.skripsi.psi_flock.kdtree.CircularRegion;
+import com.skripsi.psi_flock.kdtree.KDTree;
+import com.skripsi.psi_flock.model.Flock;
+import com.skripsi.psi_flock.model.FlockPattern;
+import com.skripsi.psi_flock.model.Location;
+import com.skripsi.psi_flock.model.Trajectory;
 
 //Asumsi yang dibuat (18-08-2021)
 public class Main{
