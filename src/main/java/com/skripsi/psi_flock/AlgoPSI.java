@@ -17,7 +17,6 @@ import com.google.common.hash.HashFunction;
 import com.google.common.primitives.Ints;
 import com.skripsi.psi_flock.model.*;
 import com.skripsi.psi_flock.kdtree.*;
-import org.streaminer.util.hash.*;
 public class AlgoPSI{
 	private int FLOCK_PATTERN_ID;
 	private static final int P_SIZE=1000;//mengatasi overhead kalau ukuran awal terlalu kecil

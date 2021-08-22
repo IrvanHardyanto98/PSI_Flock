@@ -100,6 +100,10 @@ public class Flock{
 		return this.centerPoint;
 	}
 	
+	public double getRadius(){
+		return this.radius;
+	}
+	
 	/**
 	* hitung titik-titik yang beririsan dengan flock lain
 	* @param other flock lainnya

@@ -4,7 +4,7 @@ import com.google.common.hash.Hashing;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.primitives.Ints;
-import org.streaminer.util.hash.*;
+import com.skripsi.psi_flock.hash.*;
 
 /**
 * kelas untuk menghitung hash value

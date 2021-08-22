@@ -21,6 +21,10 @@ import com.skripsi.psi_flock.model.Flock;
 import com.skripsi.psi_flock.model.FlockPattern;
 import com.skripsi.psi_flock.model.Location;
 import com.skripsi.psi_flock.model.Trajectory;
+import com.skripsi.psi_flock.pdf.PDFWriter;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 //Asumsi yang dibuat (18-08-2021)
 public class Main{
@@ -49,6 +53,7 @@ public class Main{
 		int timestamp=0;
 		double x;
 		double y;
+		long totalTime=0;
 		while(true){//kondisi berhenti masih belum kepikiran
 			points.clear();
 			//baca input
@@ -86,14 +91,18 @@ public class Main{
 				points.add(currentPoint);
 			}
 			long start=System.currentTimeMillis();
+			LocalDateTime startDate=LocalDateTime.now(ZoneId.of("Asia/Jakarta"));
+			
 			problemInstance.findAllFlockPattern(timestamp,points);
 			long end = System.currentTimeMillis();
+			totalTime += (end-start);
+			
 			System.out.println("durasi pencarian : "+(end-start)+" (milisekon)");
 			String outputFileName="flock_patterns.txt";
 			File outputFile = new File(outputFileName);
 			FileWriter fw = new FileWriter(outputFile,false);
 			BufferedWriter writer = new BufferedWriter(fw);
-				
+			
 			writer.append("Flock pattern yang ditemukan: \n");
 			writer.append("\n");
 			writer.append("Parameter yang digunakan:\n");
@@ -118,6 +127,43 @@ public class Main{
 				}
 				writer.close();
 				System.out.println("output file is written at: ");
+				
+				PDFWriter pw = new PDFWriter("FlockPatterns.pdf","Pencarian Flock Pattern Menggunakan Algortima PSI");
+				pw.addParagraph("Ringkasan Hasil Pencarian");
+			String[][] runAttr = new String[3][2];
+			runAttr[0][0] = "Waktu mulai";
+			runAttr[0][1] = startDate.format(DateTimeFormatter.ofPattern("dd-MM-yyyy H:m:s"));
+			runAttr[1][0] = "Durasi Pencarian";
+			runAttr[1][1] = Long.toString(totalTime)+" milisekon";
+			runAttr[2][0] = "Jumlah Flock Pattern yang ditemukan";
+			runAttr[2][1] = Integer.toString(patterns.size()); 
+			pw.addTable(runAttr);
+			pw.addBlankLine();
+			pw.addParagraph("Parameter yang digunakan");
+			String[][] params = new String[4][2];
+			params[0][0] ="Jumlah entitas minimal";
+			params[0][1] =Integer.toString(minEntityNum);
+			params[1][0] ="Batasan jarak";
+			params[1][1] =Double.toString(distTreshold);
+			params[2][0] ="Durasi flock minimal";
+			params[2][1] =Integer.toString(minDuration);
+			params[3][0] ="Nilai seed yang digunakan";
+			params[3][1] =Integer.toString(seed);
+			pw.addTable(params);
+			pw.addBlankLine();
+			
+			pw.addParagraph("Flock Pattern yang ditemukan: ");
+			iter = keys.iterator();
+			String[] arrFlock = new String[patterns.size()];
+			int idx=0;
+			while(iter.hasNext()){
+				FlockPattern pp = patterns.get(iter.next());
+				if(pp.getFlocksNum()>=minEntityNum){
+					arrFlock[idx++]=pp.toString();	
+				}
+			}
+			pw.addBasicList(true,arrFlock);
+			pw.closeDocument();
 				break;
 			}
 		}catch(FileNotFoundException e){
