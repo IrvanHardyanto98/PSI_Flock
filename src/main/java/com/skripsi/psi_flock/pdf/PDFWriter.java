@@ -31,6 +31,7 @@ public class PDFWriter {
 	private static final float RIGHT_MARGIN=20;
 	private static final float TOP_MARGIN=20;
 	private static final float BOTTOM_MARGIN=20;
+	private static final ListNumberingType[] NUMBERING_TYPE= new ListNumberingType[]{ListNumberingType.DECIMAL,ListNumberingType.ROMAN_UPPER,ListNumberingType.ENGLISH_UPPER};
 	private Document document;
 	private PdfFont font;
 	private PdfFont boldFont;
@@ -82,6 +83,35 @@ public class PDFWriter {
 		}
 		
 		this.document.add(list);
+	}
+	
+	
+	public void addNestedList(StringTreeNode st){
+		List topList = new List();
+		topList.setSymbolIndent(LIST_SYMBOL_INDENT).setListSymbol(ListNumberingType.DECIMAL);
+		for(int i = 0 ; i < st.getChildrenNum();i++){//FP
+			ListItem topItem = new ListItem();
+			List secondList = new List();
+			secondList.setSymbolIndent(LIST_SYMBOL_INDENT+5).setListSymbol(ListNumberingType.ROMAN_UPPER);
+			for(int j = 0; j < st.getChildren(i).getChildrenNum();j++){
+				ListItem secondItem = new ListItem();
+				
+				List thirdList = new List();
+				thirdList.setSymbolIndent(LIST_SYMBOL_INDENT+5).setListSymbol(ListNumberingType.ENGLISH_LOWER);
+				for(int k=0;k<st.getChildren(i).getChildren(j).getChildrenNum();k++){
+					thirdList.add(new ListItem(st.getChildren(i).getChildren(j).getChildren(k).getValue()));
+				}
+				secondItem.add(new Paragraph(st.getChildren(i).getChildren(j).getValue()));
+				secondItem.add(thirdList);
+				secondList.add(secondItem);
+			}
+			topItem.add(new Paragraph(st.getChildren(i).getValue()));
+			
+			//titik krusial list bersarang
+			topItem.add(secondList);
+			topList.add(topItem);
+		}
+		this.document.add(topList);
 	}
 	/**
 	 * Tambahkan tabel, dengan posisi header terletak di kolom

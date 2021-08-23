@@ -79,19 +79,7 @@ public class FlockPattern{
 		String s="ID Flock Pattern: "+this.flockPatternID+"\n";
 		s+="Waktu mulai: "+this.startTime+"\n";
 		s+="Waktu akhir: "+this.endTime+"\n";
-		s+="Jumlah flock dalam Flock Pattern: "+this.flocks.size()+"\n\n";
-//		for(int i=0;i<this.flocks.size();i++){
-//			Flock f = this.flocks.get(i);
-//			s+="\t\t Flock ke-"+(i+1)+": \n";
-//			s+="\t\t Titik pusat: ("+f.getCenterPoint().getX()+","+f.getCenterPoint().getY()+")\n";
-//			s+="\t\t Radius: "+f.getRadius()+"\n";
-//			s+="\t\t Titik-Titik Lokasi yang berada di dalam flock ini:\n\n";
-//			for(int j=0;j<f.getAllLocation().size();j++){
-//				Location l = f.getAllLocation().get(j);
-//				s+="\t\t\t Posisi: ("+l.getX()+","+l.getY()+")\n";
-//				s+="\t\t\t Waktu: "+l.getTimestamp()+"\n\n";
-//			}
-//		}
+		s+="Jumlah flock dalam Flock Pattern: "+this.flocks.size()+"\n";
 		return s;
 	}
 }

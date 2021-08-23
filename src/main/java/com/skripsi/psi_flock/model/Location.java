@@ -66,9 +66,9 @@ public class Location{
 	}
 	@Override
 	public String toString(){
-		String s="Entity ID: "+this.entityID+"\n";
-		s+= "timestamp: "+this.timestamp+"\n";
-		s+= "position ("+this.position.getX()+","+this.position.getY()+")\n\n";
+		String s="ID entitas: "+this.entityID+"\n";
+		s+= "waktu: "+this.timestamp+"\n";
+		s+= "posisi ("+this.position.getX()+","+this.position.getY()+")\n\n";
 		return s;
 	}
 }

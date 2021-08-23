@@ -166,13 +166,6 @@ public class Flock{
 		String s="titik pusat flock: ("+this.centerPoint.getX()+","+this.centerPoint.getY()+")\n";
 		s+="jari-jari flock adalah: "+this.radius+"\n";
 		s+="jumlah titik pada flock: "+this.locations.size()+"\n";
-		for(Location loc: this.locations){
-			//s+="\n";
-			s+="Entitas ke-"+n+" :\n";
-			n++;
-			s+=loc.toString();
-			//s+="titik ("+loc.getX()+","+loc.getY()+")\n";
-		}
 		return s;
 	}
 

@@ -330,14 +330,12 @@ public class AlgoPSI{
 			HashSet<Flock> s2 = new HashSet<>();//untuk per satu 'titik'
 			//System.out.println(invertedIndex.toString());
 			//untuk setiap flock pada waktu saat ini...
+			
+			HashMap<Integer,FlockPattern> latest=new HashMap<>();
 			for(int i=0;i<currFlocks.size();i++){
 				s1.clear();
 				Flock curr = currFlocks.get(i);
 				boolean noMatch = true;
-
-				//udah ga tau lagi harus pake nama apa
-				//untuk menyimpan flock hasil kueri (flock pada waktu sblmnya)
-				
 
 				//iterasi setiap 'titik' pada flock-flock saaat ini
 				for(int j=0;j<curr.getAllLocation().size();j++){
@@ -385,12 +383,16 @@ public class AlgoPSI{
 							//artinya dia buat 'cabang' baru
 							FlockPattern newPattern=new FlockPattern(this.FLOCK_PATTERN_ID,fp.getStartTime(),fp.getAllFlock(),fp.getAllID());
 							newPattern.addFlock(curr);
-							flockPatterns.put(this.FLOCK_PATTERN_ID,newPattern);
+							latest.put(this.FLOCK_PATTERN_ID,newPattern);
 							this.FLOCK_PATTERN_ID++;
+						}else{
+							latest.put(patternID,fp);
 						}
 					}
 				}
 			}
+			flockPatterns.clear();
+			flockPatterns.putAll(latest);
 		}
 	}
 
