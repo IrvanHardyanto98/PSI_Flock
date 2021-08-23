@@ -5,8 +5,8 @@ Pencarian flock dengan menggunakan algoritma Plane Sweep, Binary Signature, dan 
 Tanaka, P. S., Vieira, M. R., dan Kaster, D. S. (2016) An improved base algorithm for online discovery of flock patterns in trajectories. *Journal of Information and Data Management*, 7, 52–67
 
 # Kebutuhan Sistem
-Pastikan versi JDK/JRE yang terpasang minimal versi 8.0
-Maven minimal versi -3.6.0
+1. Pastikan versi JDK/JRE yang terpasang minimal versi 8.0
+2. Maven minimal versi -3.6.0
 
 # *Library* Tambahan yang digunakan
 1. Library spooky hash (https://github.com/mayconbordin/streaminer)
