@@ -54,7 +54,6 @@ public class AlgoPSI{
 //			System.out.println(x.getAllFlock().toString());
 //		}
 		//System.out.println("Final flocks are");
-		//System.out.println(finalFlocks.toString());
 	}
 	/**
 	* Cari kandidat flock pada waktu ti, dengan menggunakan metode plane sweep
@@ -328,7 +327,6 @@ public class AlgoPSI{
 			invertedIndex=this.buildInvertedIndex(flockPatterns,currTime-1);
 			HashSet<Flock> s1 = new HashSet<>();//untuk semuanya
 			HashSet<Flock> s2 = new HashSet<>();//untuk per satu 'titik'
-			//System.out.println(invertedIndex.toString());
 			//untuk setiap flock pada waktu saat ini...
 			
 			HashMap<Integer,FlockPattern> latest=new HashMap<>();
@@ -382,6 +380,7 @@ public class AlgoPSI{
 						if(!fp.addFlock(curr)){
 							//artinya dia buat 'cabang' baru
 							FlockPattern newPattern=new FlockPattern(this.FLOCK_PATTERN_ID,fp.getStartTime(),fp.getAllFlock(),fp.getAllID());
+							newPattern.getAllFlock().remove(newPattern.getAllFlock().size()-1);
 							newPattern.addFlock(curr);
 							latest.put(this.FLOCK_PATTERN_ID,newPattern);
 							this.FLOCK_PATTERN_ID++;

@@ -13,13 +13,13 @@
     </properties>
     <build>
         <!--referensi: http://www.javabyexamples.com/create-executable-jar-with-dependencies-using-maven-->
-        <!--referensi: https://stackoverflow.com/a/64263739/16493283-->
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.2.2</version>
                 <configuration>
+                    <finalName>psi_flock</finalName>
                     <transformers>
                         <transformer
                             implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
@@ -28,6 +28,7 @@
                     </transformers>
                     <shadedArtifactAttached>true</shadedArtifactAttached>
                     <shadedArtifactId>application</shadedArtifactId>
+                    <!--referensi: https://stackoverflow.com/a/64263739/16493283-->
                     <filters>
                         <filter>
                             <artifact>*:*</artifact>
