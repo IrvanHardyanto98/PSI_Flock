@@ -42,10 +42,11 @@ public class KDTree{
 				}
 			}
 			
-			
 			KDTreeNode leftNode=buildKDTreeRec(locations,depth+1,left,median);//atau 'bawah'
-			KDTreeNode rightNode=buildKDTreeRec(locations,depth+1,median+1,right);//atau 'atas'
-			
+			KDTreeNode rightNode=null;//atau 'atas'
+			if(median<right){
+				rightNode=buildKDTreeRec(locations,depth+1,median+1,right);
+			}
 			KDTreeNode curr = new KDTreeNode(v);
 			curr.left=leftNode;
 			curr.right=rightNode;

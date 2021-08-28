@@ -37,7 +37,23 @@ public class AlgoPSI{
 	}
 	
 	public HashMap<Integer,FlockPattern>getAllFlockPattern(){
-		return new HashMap<Integer,FlockPattern>(this.patterns);
+		return new HashMap<>(this.patterns);
+	}
+	
+	//Asumsi semua lintasan mulai di waktu yang sama
+	public void findAllFlockPattern(Trajectory[] trajectories){
+		//cari lokasi pada setiap waktu..
+		//untuk file IPE
+		ArrayList<Location> locs = new ArrayList<>(trajectories.length);
+		for(int i = 1;i <= this.minTimeInstance;i++){
+			locs.clear();
+			for(int j=0;j<trajectories.length;j++){
+				locs.add(trajectories[j].getLocation(i));
+			}
+			System.out.println("locs: "+locs.toString());
+			this.findAllFlockPattern(i, locs);
+			
+		}
 	}
 	/**
 	* Method utama kelas AlgoPSI
@@ -53,7 +69,10 @@ public class AlgoPSI{
 //			System.out.println(x.toString());
 //			System.out.println(x.getAllFlock().toString());
 //		}
-		//System.out.println("Final flocks are");
+		System.out.println("Final flocks at time: "+timestamp);
+		System.out.println(finalFlocks.toString());
+		System.out.println("Flock pattern pada waktu: "+timestamp+" adalah:");
+		System.out.println(this.patterns.toString());
 	}
 	/**
 	* Cari kandidat flock pada waktu ti, dengan menggunakan metode plane sweep
@@ -99,7 +118,7 @@ public class AlgoPSI{
 			MinimumBoundingRectangle mbr = new MinimumBoundingRectangle(pr.getPosition(),timestamp,new Point2D.Double(x1,y1),new Point2D.Double(x2,y2));
 			for(int i = 0 ; i < P.size();i++){
 				Location p = P.get(i);
-				if (p.equals(pr)){
+				if(p.equals(pr)){
 					continue;
 				}else if(dist(p.getX(),p.getY(),pr.getX(),pr.getY())<=this.distTreshold){
 					//System.out.println("pr: ("+pr.getX()+","+pr.getY()+"), p: ("+p.getX()+","+p.getY()+")");
@@ -179,11 +198,6 @@ public class AlgoPSI{
 			xb=p.getX();
 			yb=p.getY();
 			
-			//System.out.println("xa: "+xa);
-			//System.out.println("ya: "+ya);
-			//System.out.println("xb: "+xb);
-			//System.out.println("yb: "+yb);
-			
 			//dCD kuadrat (BELUM diakar kuadrat)
 			//double dAB = this.dist(xa,ya,xb,yb);
 			//double dCD= (flockRadius*flockRadius)-Math.pow(dAB/2.0,2);
@@ -223,15 +237,17 @@ public class AlgoPSI{
 		//Buat dua buah flock
 		//setiap flock punya signature -> dihitung dari ID_Entitas
 		//artinya setiap nambahin satu 'titik' ke flock -> hitung binary signature.
+		
+		//System.out.println("xc1: "+xc1);
+		//System.out.println("yc1: "+yc1);
+		//System.out.println("xc2: "+xc2);
+		//System.out.println("yc2: "+yc2);
 		xc1 = this.roundValue(xc1);
 		yc1 = this.roundValue(yc1);
 
 		xc2= this.roundValue(xc2);
 		yc2= this.roundValue(yc2);
-		//System.out.println("xc1: "+xc1);
-		//System.out.println("yc1: "+yc1);
-		//System.out.println("xc2: "+xc2);
-		//System.out.println("yc2: "+yc2);
+
 		result[0]=new Flock(Hasher.getInstance(this.seedHash),timestamp,flockRadius,xc1,yc1);
 		result[1]=new Flock(Hasher.getInstance(this.seedHash),timestamp,flockRadius,xc2,yc2);
 		CircularRegion q1 = new CircularRegion(xc1,yc1,this.distTreshold/2.0);
@@ -239,11 +255,11 @@ public class AlgoPSI{
 		
 		//cari titik yang terletak dalam radius flock.
 		ArrayList<Location> queryResult = tree.rangeQuery(q1);
-		//System.out.println("query size is: "+queryResult.size());
+		System.out.println("query size is: "+queryResult.size());
 		result[0].addLocations(queryResult);
 
 		queryResult = tree.rangeQuery(q2);
-		//System.out.println("query size is: "+queryResult.size());
+		System.out.println("query size is: "+queryResult.size());
 		result[1].addLocations(queryResult);
 		return result;
 	}
@@ -311,7 +327,7 @@ public class AlgoPSI{
 	public void joinFlock(HashMap<Integer,FlockPattern> flockPatterns,int currTime,ArrayList<Flock> currFlocks){
 		//
 		HashMap<Integer,ArrayList<Flock>> invertedIndex;
-		
+
 		//flock pattern tidak harus selalu mulai di t1, bisa saja di t3, t4
 		//yang penting memenuhi syarat MINIMAL \delta buah timestamp YANG BERUNTUN (tidak putus ditengah-tengah).
 		
