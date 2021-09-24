@@ -6,7 +6,6 @@ import java.util.ArrayList;
 //mencakup seluruh titik yang terletak tidak lebih dari varepsilon dari titik p_r
 public class MinimumBoundingRectangle{
 	private ArrayList<Flock> flocks;
-	private boolean isActive;
 	private int timestamp;
 	private Point2D p1;
 	private Point2D p2;
@@ -42,10 +41,6 @@ public class MinimumBoundingRectangle{
 	
 	public ArrayList<Flock> getAllFlock(){
 		return this.flocks;
-	}
-	
-	public void setAsActive(){
-		this.isActive=true;
 	}
 	
 	public boolean doesOverlap(MinimumBoundingRectangle other) {

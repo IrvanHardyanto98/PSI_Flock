@@ -8,7 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Tuliskan file output ke file TXT
+ * Tuliskan file output ke file TXT, untuk keperluan uji kualitatif
  * @author Irvan Hardyanto
  */
 public class TXTWriter {
@@ -29,6 +29,14 @@ public class TXTWriter {
 	public void addLine(String line){
 		try{
 			this.writer.append(line+"\n");
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+	}
+	
+	public void addBlankLine(){
+		try{
+			this.writer.append("\n");
 		}catch(IOException e){
 			e.printStackTrace();
 		}

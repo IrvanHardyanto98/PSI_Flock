@@ -1,5 +1,7 @@
 package com.skripsi.psi_flock.kdtree;
 import  com.skripsi.psi_flock.model.Location;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class CircularRegion implements Region{
 	private double x;
@@ -40,7 +42,19 @@ public class CircularRegion implements Region{
 	}
 	
 	public boolean containsPoint(Location loc){
-		return Math.pow(loc.getX()-this.x,2)+Math.pow(loc.getY()-this.y,2) <= this.radius*this.radius;
+		//System.out.println("\nloc ("+loc.getX()+","+loc.getY()+"), ctr: ("+this.x+","+this.y+")");
+		
+		double res = Math.pow(loc.getX()-this.x,2)+Math.pow(loc.getY()-this.y,2);
+		BigDecimal bd = new BigDecimal(res).setScale(5, RoundingMode.HALF_EVEN);
+     	double rounded = bd.doubleValue();
+		//System.out.println("hasil pembulatan: "+rounded);
+		//System.out.println("selisih: "+(rounded-(this.radius*this.radius)));
+		double diff = rounded-(this.radius*this.radius);
+		
+		BigDecimal bd2 = new BigDecimal(diff).setScale(5, RoundingMode.HALF_EVEN);
+		//System.out.println("selisih yang dibulatin 5 angka belakang koma: "+bd2.doubleValue());
+		
+		return bd2.doubleValue()<=0.1;//kalo angkanya bulat
 	}
 	
 	public String toString(){

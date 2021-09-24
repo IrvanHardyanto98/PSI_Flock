@@ -25,15 +25,17 @@ public class AlgoPSI{
 	private double distTreshold;
 	private int minEntityNum;
 	private int seedHash;
+	private int startTime;
 	private HashMap<Integer,FlockPattern> patterns;
 	
-	public AlgoPSI(int minEntityNum,double distTreshold,int minTimeInstance,int seedHash){
+	public AlgoPSI(int startTime,int minEntityNum,double distTreshold,int minTimeInstance,int seedHash){
 		this.FLOCK_PATTERN_ID = 1;
 		this.minEntityNum=minEntityNum;
 		this.distTreshold=distTreshold;
 		this.minTimeInstance=minTimeInstance;
 		this.seedHash=seedHash;
 		this.patterns = new HashMap<>();
+		this.startTime=startTime;
 	}
 	
 	public HashMap<Integer,FlockPattern>getAllFlockPattern(){
@@ -45,14 +47,23 @@ public class AlgoPSI{
 		//cari lokasi pada setiap waktu..
 		//untuk file IPE
 		ArrayList<Location> locs = new ArrayList<>(trajectories.length);
-		for(int i = 1;i <= this.minTimeInstance;i++){
+		
+		for(int i = this.startTime;i <= (this.minTimeInstance+this.startTime-1);i++){
 			locs.clear();
+			long start = System.currentTimeMillis();
 			for(int j=0;j<trajectories.length;j++){
-				locs.add(trajectories[j].getLocation(i));
+				Location l = trajectories[j].getLocation(i);
+				if(l!=null){
+					locs.add(l);
+				}
 			}
-			System.out.println("locs: "+locs.toString());
+			if(locs.isEmpty()){
+				System.out.println("Error! tidak ada catatan posisi pada waktu : "+i);
+				break;
+			}
+			//System.out.println("locs: "+locs.toString());
 			this.findAllFlockPattern(i, locs);
-			
+			//System.out.println("durasi pencarian flock untuk waktu: "+i+" adalah: "+(System.currentTimeMillis()-start)+" milisekon");
 		}
 	}
 	/**
@@ -64,15 +75,39 @@ public class AlgoPSI{
 		ArrayList<MinimumBoundingRectangle> mbr = this.findCandidateFlock(timestamp,loc);
 		ArrayList<Flock> finalFlocks = this.filterFlocks(mbr);
 		this.joinFlock(this.patterns,timestamp,finalFlocks);
-		//System.out.println(mbr.toString());
-//		for(MinimumBoundingRectangle x: mbr){
-//			System.out.println(x.toString());
-//			System.out.println(x.getAllFlock().toString());
-//		}
+		System.out.println("flock yang ditemukan pada waktu "+timestamp+" apa adanya: ");
+		for(MinimumBoundingRectangle x: mbr){
+			System.out.println(x.toString());
+			System.out.println(x.getAllFlock().toString());
+		}
 		System.out.println("Final flocks at time: "+timestamp);
-		System.out.println(finalFlocks.toString());
+		for(Flock f:finalFlocks){
+			System.out.println(f.toString());
+			System.out.println(f.getAllLocation().toString());
+		}
+		//System.out.println(finalFlocks.toString());
 		System.out.println("Flock pattern pada waktu: "+timestamp+" adalah:");
-		System.out.println(this.patterns.toString());
+		Iterator<Integer> iter = this.patterns.keySet().iterator();
+		while(iter.hasNext()){
+			FlockPattern fp = this.patterns.get(iter.next());
+			System.out.println(fp.toString());
+			HashSet<Integer> temp=fp.getLastFlock().getEntityIDSet();
+			Iterator<Integer> iter2 = temp.iterator();
+			
+			String s="Entitas-entitas yang berada di dalam flock pattern adalah: ";
+			boolean first=true;
+			while(iter2.hasNext()){
+				if(first){
+					first=false;
+				}else{
+					s+=",";
+				}
+				Integer eID = iter2.next();
+				s+=eID;
+			}
+			System.out.println(s);
+		}
+		
 	}
 	/**
 	* Cari kandidat flock pada waktu ti, dengan menggunakan metode plane sweep
@@ -84,58 +119,54 @@ public class AlgoPSI{
 		double y1=Double.MAX_VALUE;
 		double x2=Double.MIN_VALUE;
 		double y2=Double.MIN_VALUE;
-		KDTree tree = new KDTree();
 		
+		KDTree tree = new KDTree();	
 		tree.buildKDTree(locations);
-		ArrayList<Location> P=new ArrayList(this.P_SIZE);
-		
-		//urutkan berdasarkan sumbu x
+	
+		ArrayList<Location> P=new ArrayList(this.P_SIZE);	
 		Arrays.sort(locations,new LocationComparatorX());
 		
-		for(Location pr: locations){//O(N)
+		for(Location pr: locations){
 			P.clear();
 			x1=Double.MAX_VALUE;
 			y1=Double.MAX_VALUE;
 			x2=Double.MIN_VALUE;
 			y2=Double.MIN_VALUE;
-			//System.out.println("curent pr, :("+pr.getX()+","+pr.getY()+")");
 			for(Location ps: locations){//O(N)
 				if(Math.abs(ps.getX()-pr.getX())<=this.distTreshold){
 					if(Math.abs(ps.getY()-pr.getY())<=this.distTreshold){
-						//System.out.println("FOUND A POINT, :("+ps.getX()+","+ps.getY()+")");
-						//cari batas-batas MBR yang mencakup titik-titik pada P
+
 						x1=Math.min(x1,ps.getX());
 						y1=Math.min(y1,ps.getY());
 						
 						x2=Math.max(x2,ps.getX());
 						y2=Math.max(y2,ps.getY());
-						//add element to P
+
 						P.add(ps);
 					}
 				}
 			}
 			
-			MinimumBoundingRectangle mbr = new MinimumBoundingRectangle(pr.getPosition(),timestamp,new Point2D.Double(x1,y1),new Point2D.Double(x2,y2));
+			MinimumBoundingRectangle mbr = new MinimumBoundingRectangle(pr.getPosition(),timestamp,
+					new Point2D.Double(x1,y1),new Point2D.Double(x2,y2));
 			for(int i = 0 ; i < P.size();i++){
 				Location p = P.get(i);
-				if(p.equals(pr)){
+				if(p.equals(pr)||p.getX()<pr.getX()){
 					continue;
-				}else if(dist(p.getX(),p.getY(),pr.getX(),pr.getY())<=this.distTreshold){
-					//System.out.println("pr: ("+pr.getX()+","+pr.getY()+"), p: ("+p.getX()+","+p.getY()+")");
-					//hitung dua buah flock c1 dan c2 yang menyinggung titik pr dan p, dari titik pada waktu ti
+				}else if(dist(p.getX(),p.getY(),pr.getX(),pr.getY())<=this.distTreshold){	
 					Flock[] flocks=this.countFlock(timestamp,pr.getPosition(),p.getPosition(),tree);
 					for(Flock c: flocks){
 						int intersectNum = c.countIntersections(P);
-						//System.out.println("intersectNum :"+intersectNum);
 						if(intersectNum >= this.minEntityNum){
-							
-							//this.candidateFlocks.add(c);
 							mbr.addFlock(c);
 						}
 					}
 				}
 			}
-			activeBoxes.add(mbr);
+			//cek dulu mbr nya kosong atau nggak
+			if(mbr.getAllFlock().size()>0){
+				activeBoxes.add(mbr);
+			}
 		}
 		return activeBoxes;
 	}
@@ -238,10 +269,10 @@ public class AlgoPSI{
 		//setiap flock punya signature -> dihitung dari ID_Entitas
 		//artinya setiap nambahin satu 'titik' ke flock -> hitung binary signature.
 		
-		//System.out.println("xc1: "+xc1);
+		//System.out.println("\n xc1: "+xc1);
 		//System.out.println("yc1: "+yc1);
 		//System.out.println("xc2: "+xc2);
-		//System.out.println("yc2: "+yc2);
+		//System.out.println("yc2: "+yc2+"\n");
 		xc1 = this.roundValue(xc1);
 		yc1 = this.roundValue(yc1);
 
@@ -255,11 +286,11 @@ public class AlgoPSI{
 		
 		//cari titik yang terletak dalam radius flock.
 		ArrayList<Location> queryResult = tree.rangeQuery(q1);
-		System.out.println("query size is: "+queryResult.size());
+		//System.out.println("query size is: "+queryResult.size());
 		result[0].addLocations(queryResult);
 
 		queryResult = tree.rangeQuery(q2);
-		System.out.println("query size is: "+queryResult.size());
+		//System.out.println("query size is: "+queryResult.size());
 		result[1].addLocations(queryResult);
 		return result;
 	}
@@ -274,16 +305,24 @@ public class AlgoPSI{
 	public ArrayList<Flock> filterFlocks(ArrayList<MinimumBoundingRectangle> activeBoxes){
 		ArrayList<Flock> finalFlocks = new ArrayList<>(this.P_SIZE);
 		for(int j=0;j<activeBoxes.size();j++){
-			for(int k=j+1;k<activeBoxes.size();k++){
-				MinimumBoundingRectangle mbr1=activeBoxes.get(j);
-				if(mbr1.doesOverlap(activeBoxes.get(k))){
-					for(Flock c:mbr1.getAllFlock()){
-						insertFlock(finalFlocks,c);
-					}
-				}else{
-					break;
-				}
+			MinimumBoundingRectangle mbr1=activeBoxes.get(j);
+			for(Flock c:mbr1.getAllFlock()){
+				insertFlock(finalFlocks,c);
 			}
+//			for(int k=j+1;k<activeBoxes.size();k++){
+//				MinimumBoundingRectangle mbr1=activeBoxes.get(j);
+//				System.out.println("mbr 1 is: "+mbr1.toString()+"size: "+mbr1.getAllFlock().size());
+//				System.out.println("mbr 2 is: "+activeBoxes.get(k).toString()+"size: "+activeBoxes.get(k).getAllFlock().size());
+//				if(mbr1.doesOverlap(activeBoxes.get(k))){
+//					System.out.println("mbr1 overlaps with mbr2");
+//					for(Flock c:mbr1.getAllFlock()){
+//						insertFlock(finalFlocks,c);
+//					}
+//				}else{
+//					System.out.println("mbr1 NOT overlap with mbr2");
+//					break;
+//				}
+//			}
 		}
 		return finalFlocks;
 	}
@@ -325,25 +364,15 @@ public class AlgoPSI{
 	* @param flockPatterns variabel reference
 	**/
 	public void joinFlock(HashMap<Integer,FlockPattern> flockPatterns,int currTime,ArrayList<Flock> currFlocks){
-		//
 		HashMap<Integer,ArrayList<Flock>> invertedIndex;
-
-		//flock pattern tidak harus selalu mulai di t1, bisa saja di t3, t4
-		//yang penting memenuhi syarat MINIMAL \delta buah timestamp YANG BERUNTUN (tidak putus ditengah-tengah).
-		
-		//kasus khusus flock pada waktu pertama banget
 		if(flockPatterns.isEmpty()){
-			//instansiasi bagian awal dari flock pattern nya
 			for(Flock f: currFlocks){
-				//satu flock-> satu pattern yg berbeda
 				this.addNewFlockPattern(flockPatterns,f,currTime);
 			}
 		}else{
-			//inverted index pada waktu sebelumnya
 			invertedIndex=this.buildInvertedIndex(flockPatterns,currTime-1);
-			HashSet<Flock> s1 = new HashSet<>();//untuk semuanya
-			HashSet<Flock> s2 = new HashSet<>();//untuk per satu 'titik'
-			//untuk setiap flock pada waktu saat ini...
+			HashSet<Flock> s1 = new HashSet<>();
+			HashSet<Flock> s2 = new HashSet<>();
 			
 			HashMap<Integer,FlockPattern> latest=new HashMap<>();
 			for(int i=0;i<currFlocks.size();i++){
@@ -351,30 +380,22 @@ public class AlgoPSI{
 				Flock curr = currFlocks.get(i);
 				boolean noMatch = true;
 
-				//iterasi setiap 'titik' pada flock-flock saaat ini
 				for(int j=0;j<curr.getAllLocation().size();j++){
 					Location loc = curr.getAllLocation().get(j);
 					s2.clear();
-					//kuerikan setiap id benda ke inverted index
-					//cari flock pada waktu sebelumnya yang mencakup id entitas
 					ArrayList<Flock> flocks=invertedIndex.get(loc.getEntityID());
-					if(flocks==null){
-						//kalau nggak ada id entitas di flock sebelumnya
-						continue;
-					}
-					//periksa join condition pada setiap flock hasil kueri
+
+					if(flocks!=null){
 					for(Flock f: flocks){
 						int similar=curr.countEntityIDIntersection(f).size();
 						if(similar>=this.minEntityNum){
-							s2.add(f);//Perhatikan method equals() dan hashCode() di kelas Flock
+							s2.add(f);
 						}
-					}
+					}}
 
 					if(j==0){
-						//Perhatikan method equals() dan hashCode() di kelas Flock
 						s1.addAll(s2);
 					}else{
-						//Perhatikan method equals() dan hashCode() di kelas Flock
 						s1.retainAll(s2);
 					}
 				}
@@ -382,20 +403,17 @@ public class AlgoPSI{
 				//untuk setiap flock pada wkt sebelumnya 
 				//yang memenuhi syarat n elemen yang sama dengan flock saat ini
 				if(!s1.isEmpty()){
-					//iterasi flock hasil kueri (flock pada waktu sebelumnya)
 					Iterator<Flock> iter = s1.iterator();
 					while(iter.hasNext()){
-						//qf itu singkatan dari 'query flock'
 						Flock qf=iter.next();
-
 						int patternID = qf.getPatternID();
-						//anggap patternID nggak nol
 						FlockPattern fp=flockPatterns.get(patternID);
 
 						//tambahkan flock saat ini ke dalam flock pattern yang sudah ada
 						if(!fp.addFlock(curr)){
 							//artinya dia buat 'cabang' baru
-							FlockPattern newPattern=new FlockPattern(this.FLOCK_PATTERN_ID,fp.getStartTime(),fp.getAllFlock(),fp.getAllID());
+							FlockPattern newPattern=new FlockPattern(this.FLOCK_PATTERN_ID,fp.getStartTime(),
+									fp.getAllFlock());
 							newPattern.getAllFlock().remove(newPattern.getAllFlock().size()-1);
 							newPattern.addFlock(curr);
 							latest.put(this.FLOCK_PATTERN_ID,newPattern);
@@ -431,13 +449,11 @@ public class AlgoPSI{
 		Iterator<Integer> iter = keySet.iterator();
 		while(iter.hasNext()){
 			FlockPattern curr = flockPatterns.get(iter.next());
-
 			Flock tail = curr.getLastFlock();
 			//System.out.println(tail.toString());
 			if(tail.getTimestamp()==timestamp){
 				//cari semua titik di dalam flock
 				ArrayList<Location> locs = tail.getAllLocation();
-				
 				//untuk setiap titik di dalam flock
 				for(int i=0;i<locs.size();i++){
 					Location currPoint = locs.get(i);
@@ -450,7 +466,6 @@ public class AlgoPSI{
 					}
 				}
 			}
-			
 		}
 		return invertedIndex;
 	}

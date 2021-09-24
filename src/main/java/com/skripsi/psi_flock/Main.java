@@ -27,6 +27,9 @@ import com.skripsi.psi_flock.pdf.PDFWriter;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 //Asumsi yang dibuat (18-08-2021)
 public class Main {
@@ -42,18 +45,21 @@ public class Main {
 		int minDuration = 0;
 		int seed = 0;
 		double distTreshold = 0.0;
-		System.out.println("Masukkan Parameter");
-		System.out.print("jumlah entitas minimal: ");
+		int startTime = 0;
+		System.out.println("Masukkan Parameter Pencarian");
+		System.out.print("Masukkan jumlah entitas minimal: ");
 		minEntityNum = sc.nextInt();
-		System.out.print("durasi minimal flock: ");
+		System.out.print("Masukkan Interval waktu mulai: ");
+		startTime = sc.nextInt();
+		System.out.print("Masukkan durasi minimal flock: ");
 		minDuration = sc.nextInt();
-		System.out.print("batasan jarak: ");
+		System.out.print("Masukkan batasan jarak: ");
 		distTreshold = sc.nextDouble();
-		System.out.print("nilai seed: ");
+		System.out.print("Masukkan nilai seed: ");
 		seed = sc.nextInt();
 		sc.nextLine();
 
-		AlgoPSI problemInstance = new AlgoPSI(minEntityNum, distTreshold, minDuration, seed);
+		AlgoPSI problemInstance = new AlgoPSI(startTime,minEntityNum, distTreshold, minDuration, seed);
 		int entityID;
 		int timestamp = 0;
 		double x;
@@ -64,14 +70,17 @@ public class Main {
 		System.out.print("\nMasukkan nama file: ");
 
 		fileName = sc.nextLine();
-		System.out.print("\nPencarion flock dimulai...");
+		System.out.print("\nPencarian flock pada interval waktu ["+startTime+","+(startTime+minDuration-1)+"] dimulai");
 
-		XMLReader reader = new XMLReader(fileName);
-
-		//baca data lintasan
-		Trajectory[] trajectories = reader.readTrajectory();
+		
 
 		long start = System.currentTimeMillis();
+		//baca data lintasan
+		Trajectory[] trajectories = readCSV(fileName);
+		//XMLReader reader = new XMLReader(fileName);
+		//Trajectory[] trajectories = reader.readTrajectory();
+
+		
 		LocalDateTime startDate = LocalDateTime.now(ZoneId.of("Asia/Jakarta"));
 
 		problemInstance.findAllFlockPattern(trajectories);
@@ -80,16 +89,21 @@ public class Main {
 		
 		HashMap<Integer, FlockPattern> patterns = problemInstance.getAllFlockPattern();
 		
-		PDFWriter pw = new PDFWriter("FlockPatterns.pdf", "Pencarian Flock Pattern Menggunakan Algortima PSI");
+		TXTWriter tw = new TXTWriter(fileName.split("\\.")[0]+".txt");
+		tw.addLine(Integer.toString(patterns.size()));
+		
+		PDFWriter pw = new PDFWriter("FlockPatterns-REV02"+fileName+"-"+minEntityNum+",("+startTime+","+(startTime+minDuration-1)+"),"+distTreshold+".pdf", "Pencarian Flock Pattern Menggunakan Algortima PSI");
 		pw.addParagraph("Ringkasan Hasil Pencarian");
-		String[][] runAttr = new String[3][2];
+		String[][] runAttr = new String[4][2];
 		
 		runAttr[0][0] = "Waktu mulai";
-		runAttr[0][1] = startDate.format(DateTimeFormatter.ofPattern("dd-MM-yyyy H:m:s"));
-		runAttr[1][0] = "Durasi Pencarian";
-		runAttr[1][1] = Long.toString(totalTime) + " milisekon";
-		runAttr[2][0] = "Jumlah Flock Pattern yang ditemukan";
-		runAttr[2][1] = Integer.toString(patterns.size());// disini dia ga bisa bedain mana yang memenuhi syarat
+		runAttr[0][1] = Integer.toString(startTime);
+		runAttr[1][0] = "Waktu akhir";
+		runAttr[1][1] = Integer.toString(startTime+minDuration-1);
+		runAttr[2][0] = "Durasi Pencarian";
+		runAttr[2][1] = Long.toString(totalTime) + " milisekon";
+		runAttr[3][0] = "Jumlah Flock Pattern yang ditemukan";
+		runAttr[3][1] = Integer.toString(patterns.size());// disini dia ga bisa bedain mana yang memenuhi syarat
 		pw.addTable(runAttr);
 		pw.addBlankLine();
 		pw.addParagraph("Parameter yang digunakan");
@@ -112,29 +126,94 @@ public class Main {
 		String[] arrFlockPattern = new String[patterns.size()];
 		int idx1 = 0;
 
-		StringTreeNode root = new StringTreeNode("Flock Pattern yang ditemukan: ");
+//		StringTreeNode root = new StringTreeNode("Ringkasan Flock Pattern yang ditemukan: ");
+		pw.addParagraph("Ringkasan Flock Pattern yang ditemukan: ");
+		long startPDF = System.currentTimeMillis();
 		while (iter.hasNext()) {
-			int idx2 = 0;
+			//int idx2 = 0;
 			FlockPattern p = patterns.get(iter.next());
-			root.setChildren(p.toString());
-			//txtOutput += (p.toString() + "\n");
-			//txtOutput += ("Flocks:\n");
-			for (Flock f : p.getAllFlock()) {
-				String flockData = f.toString();
-				root.getChildren(idx1).setChildren(flockData);
-				for (Location l : f.getAllLocation()) {
-					root.getChildren(idx1).getChildren(idx2).setChildren(l.toString());
+			String s = p.toString();
+
+			HashSet<Integer> temp=p.getLastFlock().getEntityIDSet();
+			Iterator<Integer> iter2 = temp.iterator();
+			
+			
+			String txtOutput="";
+			s+="Entitas-entitas yang berada di dalam flock pattern adalah: ";
+			boolean first=true;
+			while(iter2.hasNext()){
+				if(first){
+					first=false;
+				}else{
+					s+=",";
+					txtOutput+=" ";
 				}
-				idx2++;
+				Integer eID = iter2.next();
+				s+=eID;
+				txtOutput+=eID;
 			}
+			tw.addLine(txtOutput);
+			tw.addLine(p.getStartTime()+" "+p.getEndTime());
+			arrFlockPattern[idx1]=s+"\n";
 			idx1++;
+//			root.setChildren(p.toString());
+//			for (Flock f : p.getAllFlock()) {
+//				String flockData = f.toString();
+//				root.getChildren(idx1).setChildren(flockData);
+//				for (Location l : f.getAllLocation()) {
+//					root.getChildren(idx1).getChildren(idx2).setChildren(l.toString());
+//				}
+//				idx2++;
+//			}
+//			idx1++;
+			//System.out.println("s: "+s);
 		}
-		pw.addNestedList(root);
+//		pw.addNestedList(root);
+		pw.addBasicList(true, arrFlockPattern);
 		pw.closeDocument();
+		tw.closeFile();
+		System.out.println("durasi menulis pdf: "+(System.currentTimeMillis()-startPDF));
 	}
-
-	public static void writePDF(HashMap<Integer, FlockPattern> patterns, long totalTime) {
-
+	
+	public static Trajectory[] readCSV(String fileName){
+		Trajectory[] trajectories = new Trajectory[1000];
+		int idx=-1;
+		
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(new File(fileName)));
+			String line;
+			boolean first = true;
+			int entityID=0;
+			int timestamp;
+			double x;
+			double y;
+			while ((line = br.readLine()) != null){
+				if(first){
+					first=false;
+					continue;
+				}
+				String[] cols=line.split(",");
+				timestamp = Integer.parseInt(cols[2]);
+				x = Double.parseDouble(cols[3]);
+				y = Double.parseDouble(cols[4]);
+				if(Integer.parseInt(cols[1])!=entityID){
+					entityID= Integer.parseInt(cols[1]);
+					idx++;
+					trajectories[idx]=new Trajectory(entityID, timestamp);
+					trajectories[idx].addLocation(x,y,timestamp);
+				}else{
+					trajectories[idx].addLocation(x,y,timestamp);
+				}
+			}
+			br.close();
+		} catch (FileNotFoundException ex) {
+			System.out.println("Error! File tidak ditemukan");
+			ex.printStackTrace();
+		}catch(IOException ex){
+			System.out.println("Error! File tidak bisa dibaca!");
+			ex.printStackTrace();
+		}
+		return Arrays.copyOf(trajectories, (idx+1));
 	}
 
 	public static void testCoord() {

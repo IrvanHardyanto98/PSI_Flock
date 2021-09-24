@@ -25,6 +25,9 @@ hs_err_pid*
 *.txt
 *.pdf
 *.ipe
+*.csv
+hasil percobaan/
+testcase/
 
 # Netbeans file, see https://github.com/github/gitignore/blob/master/Global/NetBeans.gitignore
 *.mf

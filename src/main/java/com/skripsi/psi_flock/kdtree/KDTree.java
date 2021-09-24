@@ -58,7 +58,7 @@ public class KDTree{
 	/**
 	*@param medianPtr pointer ke median
 	**/
-	public Location findMedian(int mode,Location[] locs,int left,int right){
+	private Location findMedian(int mode,Location[] locs,int left,int right){
 		if(left>=right)return null;
 		//if(right-left==1)return locs[left];
 		TreeSet<Double> ts=new TreeSet<>();

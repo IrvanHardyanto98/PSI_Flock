@@ -70,7 +70,7 @@ public class XMLReader {
 			Node node = list.item(i);
 			Element element = (Element) node;
 			String attr = element.getAttribute("stroke");
-			if(attr.equals("black")||attr.equals("red")||attr.equals("green")||attr.equals("blue")){
+			if(attr.equals("black")||attr.equals("red")||attr.equals("green")||attr.equals("blue")||attr.equals("turquoise")){
 				String row[]=element.getTextContent().trim().split("\\n");
 				result[i]=new Trajectory(entityID,timestamp);
 				for(String s: row){

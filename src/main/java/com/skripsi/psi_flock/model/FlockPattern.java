@@ -13,25 +13,18 @@ public class FlockPattern{
 	private final int startTime;
 	private int endTime;
 	private ArrayList<Flock> flocks;
-	private HashSet<Integer> entityIDList;
 	public FlockPattern(int flockPatternID,int startTime){
 		this.startTime = startTime;
 		this.endTime = 0;
 		this.flockPatternID=flockPatternID;
 		this.flocks=new ArrayList<>();
-		this.entityIDList = new HashSet<>();
 	}
 	
-	public FlockPattern(int flockPatternID,int startTime,ArrayList<Flock> existingFlocks,HashSet<Integer> existingIDs){
+	public FlockPattern(int flockPatternID,int startTime,ArrayList<Flock> existingFlocks){
 		this.startTime = startTime;
 		this.endTime = 0;
 		this.flockPatternID=flockPatternID;
 		this.flocks=new ArrayList<>(existingFlocks);
-		this.entityIDList = new HashSet<>(existingIDs);
-	}
-	
-	public HashSet<Integer> getAllID(){
-		return this.entityIDList;
 	}
 	
 	/**
@@ -59,6 +52,10 @@ public class FlockPattern{
 
 	public void setEndTime(int endTime){
 		this.endTime=endTime;
+	}
+	
+	public int getEndTime(){
+		return this.endTime;
 	}
 
 	public int getID(){
