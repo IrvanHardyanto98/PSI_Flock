@@ -52,6 +52,7 @@ public class Flock{
 	//jangan lupa hitung binary signature nya;
 	public void addLocation(Location loc){
 		this.locations.add(loc);
+		this.entitiyIDSet.add(loc.getEntityID());
 		long spookyHashVal = this.hasher.doSpookyHash(loc.getEntityID());
 		long murHashVal = this.hasher.doMurMurHash(loc.getEntityID());
 		this.binarySignature.set((int)(spookyHashVal%this.BITSTRING_LENGTH));

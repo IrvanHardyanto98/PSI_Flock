@@ -35,8 +35,17 @@ import java.util.logging.Logger;
 public class Main {
 
 	private static final int FIELD_NUM = 4;
-
+	private static int maxTime;
+	
 	public static void main(String[] args) {
+		try{
+		File file = new File("err.txt");
+		FileOutputStream fos = new FileOutputStream(file);
+		PrintStream ps = new PrintStream(fos);
+		System.setErr(ps);
+		}catch(FileNotFoundException e){
+			e.printStackTrace();
+		}
 		Scanner sc = new Scanner(System.in);
 		System.out.println("PENCARIAN FLOCK PATTERN MENGGUNAKAN ALGORITMA PSI");
 
@@ -49,7 +58,7 @@ public class Main {
 		System.out.println("Masukkan Parameter Pencarian");
 		System.out.print("Masukkan jumlah entitas minimal: ");
 		minEntityNum = sc.nextInt();
-		System.out.print("Masukkan Interval waktu mulai: ");
+		System.out.print("Masukkan waktu mulai: ");
 		startTime = sc.nextInt();
 		System.out.print("Masukkan durasi minimal flock: ");
 		minDuration = sc.nextInt();
@@ -83,13 +92,14 @@ public class Main {
 		
 		LocalDateTime startDate = LocalDateTime.now(ZoneId.of("Asia/Jakarta"));
 
-		problemInstance.findAllFlockPattern(trajectories);
+		System.out.println("MAX TIME INSTANCE IS: "+maxTime);
+		problemInstance.findAllFlockPattern(trajectories,maxTime);
 		long end = System.currentTimeMillis();
 		totalTime += (end - start);
 		
 		HashMap<Integer, FlockPattern> patterns = problemInstance.getAllFlockPattern();
 		
-		TXTWriter tw = new TXTWriter(fileName.split("\\.")[0]+".txt");
+		TXTWriter tw = new TXTWriter(fileName.split("\\.")[0]+"-"+minEntityNum+"-"+distTreshold+"-"+minDuration+".txt");
 		tw.addLine(Integer.toString(patterns.size()));
 		
 		PDFWriter pw = new PDFWriter("FlockPatterns-REV02"+fileName+"-"+minEntityNum+",("+startTime+","+(startTime+minDuration-1)+"),"+distTreshold+".pdf", "Pencarian Flock Pattern Menggunakan Algortima PSI");
@@ -176,7 +186,8 @@ public class Main {
 	}
 	
 	public static Trajectory[] readCSV(String fileName){
-		Trajectory[] trajectories = new Trajectory[1000];
+		maxTime = Integer.MIN_VALUE;
+		Trajectory[] trajectories = new Trajectory[3000];
 		int idx=-1;
 		
 		try {
@@ -193,11 +204,12 @@ public class Main {
 					continue;
 				}
 				String[] cols=line.split(",");
-				timestamp = Integer.parseInt(cols[2]);
-				x = Double.parseDouble(cols[3]);
-				y = Double.parseDouble(cols[4]);
-				if(Integer.parseInt(cols[1])!=entityID){
-					entityID= Integer.parseInt(cols[1]);
+				timestamp = Integer.parseInt(cols[1]);
+				if(timestamp>maxTime)maxTime=timestamp;
+				x = Double.parseDouble(cols[2]);
+				y = Double.parseDouble(cols[3]);
+				if(Integer.parseInt(cols[0])!=entityID){
+					entityID= Integer.parseInt(cols[0]);
 					idx++;
 					trajectories[idx]=new Trajectory(entityID, timestamp);
 					trajectories[idx].addLocation(x,y,timestamp);

@@ -76,7 +76,7 @@ public class FlockPattern{
 		String s="ID Flock Pattern: "+this.flockPatternID+"\n";
 		s+="Waktu mulai: "+this.startTime+"\n";
 		s+="Waktu akhir: "+this.endTime+"\n";
-		s+="Jumlah flock dalam Flock Pattern: "+this.flocks.size()+"\n";
+		//s+="Jumlah flock dalam Flock Pattern: "+this.flocks.size()+"\n";
 		return s;
 	}
 }
