@@ -13,11 +13,13 @@ public class FlockPattern{
 	private final int startTime;
 	private int endTime;
 	private ArrayList<Flock> flocks;
+	private HashSet<Integer> entityIDSet;
 	public FlockPattern(int flockPatternID,int startTime){
 		this.startTime = startTime;
 		this.endTime = 0;
 		this.flockPatternID=flockPatternID;
 		this.flocks=new ArrayList<>();
+		this.entityIDSet = new HashSet<>();
 	}
 	
 	public FlockPattern(int flockPatternID,int startTime,ArrayList<Flock> existingFlocks){
@@ -25,6 +27,7 @@ public class FlockPattern{
 		this.endTime = 0;
 		this.flockPatternID=flockPatternID;
 		this.flocks=new ArrayList<>(existingFlocks);
+		this.entityIDSet = new HashSet<>();
 	}
 	
 	/**
@@ -35,11 +38,20 @@ public class FlockPattern{
 			return false;
 		}
 		flock.setPatternID(this.flockPatternID);
+		if(this.flocks.isEmpty()){
+			this.entityIDSet.addAll(flock.getEntityIDSet());
+		}
 		this.flocks.add(flock);
 		this.endTime=flock.getTimestamp();
 		//masih perlu diubah
 		//this.entityIDList.addAll(flock.getEntityIDSet());
 		return true;
+	}
+	
+	public int countIntersection(Flock flock){
+		HashSet<Integer> copy = new HashSet<>(flock.getEntityIDSet());
+		copy.retainAll(this.entityIDSet);
+		return copy.size();
 	}
 	
 	public int getFlocksNum(){

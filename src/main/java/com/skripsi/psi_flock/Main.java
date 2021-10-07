@@ -58,8 +58,8 @@ public class Main {
 		System.out.println("Masukkan Parameter Pencarian");
 		System.out.print("Masukkan jumlah entitas minimal: ");
 		minEntityNum = sc.nextInt();
-		System.out.print("Masukkan waktu mulai: ");
-		startTime = sc.nextInt();
+		//System.out.print("Masukkan waktu mulai: ");
+		//startTime = sc.nextInt();
 		System.out.print("Masukkan durasi minimal flock: ");
 		minDuration = sc.nextInt();
 		System.out.print("Masukkan batasan jarak: ");
@@ -68,7 +68,8 @@ public class Main {
 		seed = sc.nextInt();
 		sc.nextLine();
 
-		AlgoPSI problemInstance = new AlgoPSI(startTime,minEntityNum, distTreshold, minDuration, seed);
+		//AlgoPSI problemInstance = new AlgoPSI(startTime,minEntityNum, distTreshold, minDuration, seed);
+		AlgoPSI problemInstance = new AlgoPSI(minEntityNum, distTreshold, minDuration, seed);
 		int entityID;
 		int timestamp = 0;
 		double x;

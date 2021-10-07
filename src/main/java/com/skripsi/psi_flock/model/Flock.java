@@ -40,6 +40,18 @@ public class Flock{
 		this.hasher=hasher;
 		this.patternID=0;
 	}
+	
+	public Flock(Flock other){
+		this.timestamp=other.timestamp;
+		this.radius = other.getRadius();
+		this.binarySignature = new BitSet(other.binarySignature.size());
+		this.binarySignature.or(other.binarySignature);
+		this.centerPoint = new Point2D.Double(other.centerPoint.getX(),other.centerPoint.getY());
+		this.locations = new ArrayList(other.locations);
+		this.entitiyIDSet = new HashSet(other.entitiyIDSet);
+		this.hasher = other.hasher;
+		this.patternID = other.patternID;
+	}
 
 	public void setPatternID(int patternID){
 		this.patternID=patternID;
@@ -83,6 +95,10 @@ public class Flock{
 	
 	public HashSet<Integer> getEntityIDSet(){
 		return this.entitiyIDSet;
+	}
+	
+	public Hasher getHasher(){
+		return this.hasher;
 	}
 	//hitung irisan ID entitas, (bedakan dengan method countIntersections yg berbasis posisi)
 	public HashSet<Integer> countEntityIDIntersection(Flock other){
@@ -167,6 +183,7 @@ public class Flock{
 		String s="titik pusat flock: ("+this.centerPoint.getX()+","+this.centerPoint.getY()+")\n";
 		s+="jari-jari flock adalah: "+this.radius+"\n";
 		s+="jumlah titik pada flock: "+this.locations.size()+"\n";
+		s+="id flock pattern: "+this.patternID+"\n";
 		return s;
 	}
 
@@ -180,13 +197,13 @@ public class Flock{
 
 			double x1=this.centerPoint.getX();
 			double y1=this.centerPoint.getY();
-			return x2==x1 && y2==y1 && this.timestamp == other.getTimestamp();
+			return this.patternID==other.getPatternID() && x2==x1 && y2==y1 && this.timestamp == other.getTimestamp();
 		}
 		return false;
 	}
 
 	@Override
 	public int hashCode(){
-		return Objects.hash(this.centerPoint.getX())+Objects.hash(this.centerPoint.getY());
+		return Objects.hash(this.patternID)+Objects.hash(this.centerPoint.getX())+Objects.hash(this.centerPoint.getY());
 	}
 }
