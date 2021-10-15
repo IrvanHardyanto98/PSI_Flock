@@ -19,6 +19,7 @@ public class TXTWriter {
 	public TXTWriter(String path){
 		this.outputFile = new File(path);
 		try{
+			//this.outputFile.mkdir();
 			this.fw = new FileWriter(outputFile,false);
 			this.writer = new BufferedWriter(fw);
 		}catch(IOException e){

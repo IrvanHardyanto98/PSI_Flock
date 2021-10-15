@@ -21,12 +21,17 @@ import com.skripsi.psi_flock.kdtree.CircularRegion;
 import com.skripsi.psi_flock.kdtree.KDTree;
 import com.skripsi.psi_flock.model.Flock;
 import com.skripsi.psi_flock.model.FlockPattern;
+import com.skripsi.psi_flock.model.Hasher;
+import com.skripsi.psi_flock.model.InvertedIndexValue;
 import com.skripsi.psi_flock.model.Location;
 import com.skripsi.psi_flock.model.Trajectory;
 import com.skripsi.psi_flock.pdf.PDFWriter;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.BitSet;
 import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,6 +43,7 @@ public class Main {
 	private static int maxTime;
 	
 	public static void main(String[] args) {
+		testInsertFlock();
 		try{
 		File file = new File("err.txt");
 		FileOutputStream fos = new FileOutputStream(file);
@@ -58,8 +64,8 @@ public class Main {
 		System.out.println("Masukkan Parameter Pencarian");
 		System.out.print("Masukkan jumlah entitas minimal: ");
 		minEntityNum = sc.nextInt();
-		System.out.print("Masukkan waktu mulai: ");
-		startTime = sc.nextInt();
+		//System.out.print("Masukkan waktu mulai: ");
+		//startTime = sc.nextInt();
 		System.out.print("Masukkan durasi minimal flock: ");
 		minDuration = sc.nextInt();
 		System.out.print("Masukkan batasan jarak: ");
@@ -68,7 +74,8 @@ public class Main {
 		seed = sc.nextInt();
 		sc.nextLine();
 
-		AlgoPSI problemInstance = new AlgoPSI(startTime,minEntityNum, distTreshold, minDuration, seed);
+		//AlgoPSI problemInstance = new AlgoPSI(startTime,minEntityNum, distTreshold, minDuration, seed);
+		AlgoPSI problemInstance = new AlgoPSI(minEntityNum, distTreshold, minDuration, seed);
 		int entityID;
 		int timestamp = 0;
 		double x;
@@ -144,7 +151,7 @@ public class Main {
 			FlockPattern p = patterns.get(iter.next());
 			String s = p.toString();
 
-			HashSet<Integer> temp=p.getLastFlock().getEntityIDSet();
+			HashSet<Integer> temp=p.getEntityIDSet();
 			Iterator<Integer> iter2 = temp.iterator();
 			
 			
@@ -185,6 +192,48 @@ public class Main {
 		System.out.println("durasi menulis pdf: "+(System.currentTimeMillis()-startPDF));
 	}
 	
+	private static void testInsertFlock(){
+				
+		
+		System.out.println("TESTING THE FUCKING FILTER LFOCK LOHIC");
+		HashSet<Integer> e1 = new HashSet<>();
+		e1.add(357);
+		e1.add(358);
+		InvertedIndexValue a = new InvertedIndexValue(1,e1);
+		HashSet<Integer> e2 = new HashSet<>();
+		e2.add(357);
+		e2.add(217);
+		InvertedIndexValue b = new InvertedIndexValue(1,e2);
+		System.out.println("test IIV, a equals b is: "+a.countIntersection(e2).toString());
+//		int seed = 1546789124;
+//		Flock testA = new Flock(Hasher.getInstance(seed), 1811, 0.4815, 3.693, 7.972);
+//		testA.addLocation(new Location(352,3.7497,7.9587,1811));
+//		testA.addLocation(new Location(353,3.7617,8.4482,1811));
+//		testA.addLocation(new Location(295,3.2115,7.9469,1811));
+//		testA.addLocation(new Location(301,3.2128,7.7455,1811));
+//		
+//		Flock testB = new Flock(Hasher.getInstance(seed), 1811, 0.4815, 3.339, 8.21);
+//		testB.addLocation(new Location(352,3.7497,7.9587,1811));
+//		testB.addLocation(new Location(353,3.7617,8.4482,1811));
+//		testB.addLocation(new Location(295,3.2115,7.9469,1811));
+//		testB.addLocation(new Location(301,3.2128,7.7455,1811));
+//		
+//		BitSet cSign = testA.getBinarySignature();
+//		BitSet dSign = testB.getBinarySignature();
+//		
+//		BitSet temp = testA.getBinarySignature();
+//			temp.and(testB.getBinarySignature());
+//			
+//		System.out.println("JARAK A KE B:"+testA.dist(testB));
+//		System.out.println("C ^ D SIGN == C?:"+temp.equals(cSign));
+//		System.out.println("C ^ D SIGN == D?:"+temp.equals(dSign));
+//		
+//		System.out.println("C union D ==D?"+customEquals(testA.intersect(testB), testB.getAllLocation()));
+//		System.out.println("C union D ==C?"+customEquals(testA.intersect(testB), testA.getAllLocation()));
+	}
+	private static boolean customEquals(ArrayList<Location> listA,ArrayList<Location> listB){
+		return listA.containsAll(listB)&&listB.containsAll(listA);
+	}
 	public static Trajectory[] readCSV(String fileName){
 		maxTime = Integer.MIN_VALUE;
 		Trajectory[] trajectories = new Trajectory[3000];
@@ -203,11 +252,16 @@ public class Main {
 					first=false;
 					continue;
 				}
+				line=line.trim();
 				String[] cols=line.split(",");
 				timestamp = Integer.parseInt(cols[1]);
 				if(timestamp>maxTime)maxTime=timestamp;
-				x = Double.parseDouble(cols[2]);
-				y = Double.parseDouble(cols[3]);
+				BigDecimal xRaw= new BigDecimal(Double.parseDouble(cols[2])).setScale(3, RoundingMode.HALF_EVEN);
+				BigDecimal yRaw= new BigDecimal(Double.parseDouble(cols[3])).setScale(3, RoundingMode.HALF_EVEN);
+				//x = Double.parseDouble(cols[2]);
+				x = xRaw.doubleValue();
+				//y = Double.parseDouble(cols[3]);
+				y = yRaw.doubleValue();
 				if(Integer.parseInt(cols[0])!=entityID){
 					entityID= Integer.parseInt(cols[0]);
 					idx++;
@@ -226,60 +280,5 @@ public class Main {
 			ex.printStackTrace();
 		}
 		return Arrays.copyOf(trajectories, (idx+1));
-	}
-
-	public static void testCoord() {
-		Location[] arr = new Location[13];
-		arr[0] = new Location(1, -1, 4, 1);
-		arr[1] = new Location(2, 4, 2, 1);
-		arr[2] = new Location(3, 1, 3, 1);
-		arr[3] = new Location(4, -3, 1, 1);
-		arr[4] = new Location(5, 2, -1, 1);
-		arr[5] = new Location(6, -2, -2, 1);
-		arr[6] = new Location(7, -2, 2, 1);
-		arr[7] = new Location(8, 2, 2, 1);
-		arr[8] = new Location(9, 1, -1, 1);
-		arr[9] = new Location(10, 4, 1, 1);
-		arr[10] = new Location(11, -1, -1, 1);
-		arr[11] = new Location(12, 1, -4, 1);
-		arr[12] = new Location(13, 1, -4.02, 1);
-
-		//Arrays.sort(arr,new LocationComparatorX());
-		int k = 5;
-		//Location kLoc = QuickSelect.select(1,arr,0,arr.length-1,k);
-		//System.out.println("k is at point: ("+kLoc.getX()+","+kLoc.getY()+")");
-		ArrayList<Location> al1 = new ArrayList<>(Arrays.asList(arr));
-		ArrayList<Location> al2 = new ArrayList<>();
-		al2.add(new Location(8, 2, 2, 1));
-		al2.add(new Location(9, 1, -1, 1));
-		al2.add(new Location(10, 4, 1, 1));
-
-		ArrayList<Location> al3 = new ArrayList<>();
-		al3.add(new Location(8, 2, 2, 1));
-		al3.add(new Location(9, 1, -1, 1));
-		al3.add(new Location(10, 4, 1, 1));
-		System.out.println("al2 equals al3 is: " + al2.equals(al3));
-
-		//al2.retainAll(al1);
-		//System.out.println("al2 size is: "+al2.size()+"\n");
-		//for(Location x: al2){
-		//System.out.print(x.toString());
-		//}
-		//KDTree tree = new KDTree();
-		//long start = System.currentTimeMillis();
-		//tree.buildKDTree(arr);
-		//long end = System.currentTimeMillis();
-		//System.out.println("BUILD TREE TIME: "+(end-start));
-		//tree.traverse();
-		//CircularRegion cR = new CircularRegion(3,1,2);
-		//OrthogonalRegion oR = new OrthogonalRegion(-3,-2,-1,4);
-		//OrthogonalRegion oR2 = new OrthogonalRegion(1,-1,4,3);
-		//OrthogonalRegion oR3 = new OrthogonalRegion(1,-4,2,-1);
-		//System.out.println(cR.toString());
-		//ArrayList<Location> res = tree.rangeQuery(cR);
-		//System.out.println("res len: "+res.size());
-		//for(Location loc: res){
-		//System.out.print("("+loc.getX()+","+loc.getY()+") ");
-		//}
 	}
 }

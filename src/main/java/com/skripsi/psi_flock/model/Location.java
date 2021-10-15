@@ -2,6 +2,7 @@ package com.skripsi.psi_flock.model;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
+import com.google.common.math.DoubleMath;
 import java.util.Objects;
 
 public class Location{
@@ -56,7 +57,9 @@ public class Location{
 		if (o == this) return true;
 		if (o instanceof Location){
 			Location other = (Location) o;
-			return (this.getX()==other.getX()&&this.getY()==other.getY());
+			boolean a = DoubleMath.fuzzyEquals(this.getX(), other.getX(), 0.01);
+			boolean b = DoubleMath.fuzzyEquals(this.getY(), other.getY(), 0.01);
+			return (a&&b);
 		}
 		return false;
 	}

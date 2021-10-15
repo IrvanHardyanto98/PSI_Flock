@@ -40,6 +40,18 @@ public class Flock{
 		this.hasher=hasher;
 		this.patternID=0;
 	}
+	
+	public Flock(Flock other){
+		this.timestamp=other.timestamp;
+		this.radius = other.getRadius();
+		this.binarySignature = new BitSet(other.binarySignature.size());
+		this.binarySignature.or(other.binarySignature);
+		this.centerPoint = new Point2D.Double(other.centerPoint.getX(),other.centerPoint.getY());
+		this.locations = new ArrayList(other.locations);
+		this.entitiyIDSet = new HashSet(other.entitiyIDSet);
+		this.hasher = other.hasher;
+		this.patternID = other.patternID;
+	}
 
 	public void setPatternID(int patternID){
 		this.patternID=patternID;
@@ -71,13 +83,13 @@ public class Flock{
 	public int countIntersections(ArrayList<Location> loc){
 		//kalau pakai array list, pastiin ga ada duplikat
 		ArrayList<Location> temp;
-		if(this.locations.size()>loc.size()){
-			temp= new ArrayList<>(this.locations);
-			temp.retainAll(new ArrayList<>(loc));
-		}else{
+		//if(this.locations.size()>loc.size()){
+			//temp= new ArrayList<>(this.locations);
+			//temp.retainAll(new ArrayList<>(loc));
+		//}else{
 			temp= new ArrayList<>(loc);
-			temp.retainAll(new ArrayList<>(this.locations));
-		}
+			temp.retainAll(this.locations);
+		//}
 		return temp.size();
 	}
 	
@@ -87,13 +99,13 @@ public class Flock{
 	//hitung irisan ID entitas, (bedakan dengan method countIntersections yg berbasis posisi)
 	public HashSet<Integer> countEntityIDIntersection(Flock other){
 		HashSet<Integer> a;
-		if(this.entitiyIDSet.size()>other.getEntityIDSet().size()){
-			a = new HashSet<>(this.entitiyIDSet);
-			a.retainAll(new HashSet<>(other.getEntityIDSet()));
-		}else{
+		//if(this.entitiyIDSet.size()>other.getEntityIDSet().size()){
+			//a = new HashSet<>(this.entitiyIDSet);
+			//a.retainAll(new HashSet<>(other.getEntityIDSet()));
+		//}else{
 			a = new HashSet<>(other.getEntityIDSet());
-			a.retainAll(new HashSet<>(this.entitiyIDSet));
-		}
+			a.retainAll(this.entitiyIDSet);
+		//}
 		return a;
 	}
 	
@@ -112,15 +124,15 @@ public class Flock{
 	public ArrayList<Location> intersect(Flock other){//O(l1.length)
 		ArrayList<Location> l1;
 		ArrayList<Location> l2;
-		if(this.locations.size()>other.getAllLocation().size()){
-			l1 = new ArrayList<>(this.locations);
-			l2 = new ArrayList<>(other.getAllLocation());
-		}else{
-			l1 = new ArrayList<>(other.getAllLocation());
-			l2 = new ArrayList<>(this.locations);
-		}
-		
-		l1.retainAll(l2);
+//		if(this.locations.size()>other.getAllLocation().size()){
+//			l1 = new ArrayList<>(this.locations);
+//			l2 = new ArrayList<>(other.getAllLocation());
+//		}else{
+//			l1 = new ArrayList<>(other.getAllLocation());
+//			l2 = new ArrayList<>(this.locations);
+//		}
+		l1 = new ArrayList<>(other.getAllLocation());
+		l1.retainAll(this.locations);
                 return l1;
 	}
 	
@@ -167,6 +179,17 @@ public class Flock{
 		String s="titik pusat flock: ("+this.centerPoint.getX()+","+this.centerPoint.getY()+")\n";
 		s+="jari-jari flock adalah: "+this.radius+"\n";
 		s+="jumlah titik pada flock: "+this.locations.size()+"\n";
+		s+="titik-titik dalam flock adalah:";
+		boolean f =true;
+		for(Integer id:entitiyIDSet){
+			if(f){
+				f=false;
+			}else{
+				s+=",";
+			}
+			s+=id;
+		}
+		s+="\n";
 		return s;
 	}
 
@@ -180,13 +203,13 @@ public class Flock{
 
 			double x1=this.centerPoint.getX();
 			double y1=this.centerPoint.getY();
-			return x2==x1 && y2==y1 && this.timestamp == other.getTimestamp();
+			return this.patternID == other.patternID && x2==x1 && y2==y1 && this.timestamp == other.getTimestamp() && (this.locations.containsAll(other.locations)&&other.locations.containsAll(this.locations));
 		}
 		return false;
 	}
 
 	@Override
 	public int hashCode(){
-		return Objects.hash(this.centerPoint.getX())+Objects.hash(this.centerPoint.getY());
+		return Objects.hash(this.patternID)+Objects.hash(this.centerPoint.getX())+Objects.hash(this.centerPoint.getY());
 	}
 }

@@ -26,6 +26,10 @@ public class MinimumBoundingRectangle{
 		this.flocks=new ArrayList<>();
 	}
 	
+	public int getTimestamp(){
+		return this.timestamp;
+	}
+	
 	public Point2D getP1(){
 		return this.p1;
 	}
