@@ -105,4 +105,21 @@ public class FlockPattern{
 		//s+="Jumlah flock dalam Flock Pattern: "+this.flocks.size()+"\n";
 		return s;
 	}
+	
+	public String getSimpleString(){
+		String s="";
+		boolean f = true;
+		Iterator<Integer> iter = this.entityID.iterator();
+		while(iter.hasNext()){
+			if(f){
+				f=false;
+			}else{
+				s+=" ";
+			}
+			s+=iter.next();
+		}
+		s+="\n";
+		s+=this.startTime+" "+this.endTime;
+		return s;
+	}
 }

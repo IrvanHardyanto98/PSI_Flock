@@ -43,7 +43,6 @@ public class Main {
 	private static int maxTime;
 	
 	public static void main(String[] args) {
-		testInsertFlock();
 		try{
 		File file = new File("err.txt");
 		FileOutputStream fos = new FileOutputStream(file);
@@ -64,18 +63,18 @@ public class Main {
 		System.out.println("Masukkan Parameter Pencarian");
 		System.out.print("Masukkan jumlah entitas minimal: ");
 		minEntityNum = sc.nextInt();
-		//System.out.print("Masukkan waktu mulai: ");
-		//startTime = sc.nextInt();
+		System.out.print("Masukkan waktu mulai: ");
+		startTime = sc.nextInt();
 		System.out.print("Masukkan durasi minimal flock: ");
 		minDuration = sc.nextInt();
 		System.out.print("Masukkan batasan jarak: ");
 		distTreshold = sc.nextDouble();
-		System.out.print("Masukkan nilai seed: ");
-		seed = sc.nextInt();
+		//System.out.print("Masukkan nilai seed: ");
+		seed = 1546789124;
 		sc.nextLine();
 
-		//AlgoPSI problemInstance = new AlgoPSI(startTime,minEntityNum, distTreshold, minDuration, seed);
-		AlgoPSI problemInstance = new AlgoPSI(minEntityNum, distTreshold, minDuration, seed);
+		AlgoPSI problemInstance = new AlgoPSI(startTime,minEntityNum, distTreshold, minDuration, seed);
+		//AlgoPSI problemInstance = new AlgoPSI(minEntityNum, distTreshold, minDuration, seed);
 		int entityID;
 		int timestamp = 0;
 		double x;
@@ -100,7 +99,8 @@ public class Main {
 		LocalDateTime startDate = LocalDateTime.now(ZoneId.of("Asia/Jakarta"));
 
 		System.out.println("MAX TIME INSTANCE IS: "+maxTime);
-		problemInstance.findAllFlockPattern(trajectories,maxTime);
+		//problemInstance.findAllFlockPattern(trajectories,maxTime);
+		problemInstance.findAllFlockPattern(trajectories);
 		long end = System.currentTimeMillis();
 		totalTime += (end - start);
 		
@@ -190,46 +190,6 @@ public class Main {
 		pw.closeDocument();
 		tw.closeFile();
 		System.out.println("durasi menulis pdf: "+(System.currentTimeMillis()-startPDF));
-	}
-	
-	private static void testInsertFlock(){
-				
-		
-		System.out.println("TESTING THE FUCKING FILTER LFOCK LOHIC");
-		HashSet<Integer> e1 = new HashSet<>();
-		e1.add(357);
-		e1.add(358);
-		InvertedIndexValue a = new InvertedIndexValue(1,e1);
-		HashSet<Integer> e2 = new HashSet<>();
-		e2.add(357);
-		e2.add(217);
-		InvertedIndexValue b = new InvertedIndexValue(1,e2);
-		System.out.println("test IIV, a equals b is: "+a.countIntersection(e2).toString());
-//		int seed = 1546789124;
-//		Flock testA = new Flock(Hasher.getInstance(seed), 1811, 0.4815, 3.693, 7.972);
-//		testA.addLocation(new Location(352,3.7497,7.9587,1811));
-//		testA.addLocation(new Location(353,3.7617,8.4482,1811));
-//		testA.addLocation(new Location(295,3.2115,7.9469,1811));
-//		testA.addLocation(new Location(301,3.2128,7.7455,1811));
-//		
-//		Flock testB = new Flock(Hasher.getInstance(seed), 1811, 0.4815, 3.339, 8.21);
-//		testB.addLocation(new Location(352,3.7497,7.9587,1811));
-//		testB.addLocation(new Location(353,3.7617,8.4482,1811));
-//		testB.addLocation(new Location(295,3.2115,7.9469,1811));
-//		testB.addLocation(new Location(301,3.2128,7.7455,1811));
-//		
-//		BitSet cSign = testA.getBinarySignature();
-//		BitSet dSign = testB.getBinarySignature();
-//		
-//		BitSet temp = testA.getBinarySignature();
-//			temp.and(testB.getBinarySignature());
-//			
-//		System.out.println("JARAK A KE B:"+testA.dist(testB));
-//		System.out.println("C ^ D SIGN == C?:"+temp.equals(cSign));
-//		System.out.println("C ^ D SIGN == D?:"+temp.equals(dSign));
-//		
-//		System.out.println("C union D ==D?"+customEquals(testA.intersect(testB), testB.getAllLocation()));
-//		System.out.println("C union D ==C?"+customEquals(testA.intersect(testB), testA.getAllLocation()));
 	}
 	private static boolean customEquals(ArrayList<Location> listA,ArrayList<Location> listB){
 		return listA.containsAll(listB)&&listB.containsAll(listA);
