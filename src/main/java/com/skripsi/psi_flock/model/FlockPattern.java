@@ -79,12 +79,6 @@ public class FlockPattern{
 		return this.entityID;
 	}
 	
-	//
-	public InvertedIndexValue getLastFlock(){
-		return new InvertedIndexValue(this.flockPatternID,this.entityID);
-	}
-	
-	
 	@Override
 	public String toString(){
 		String s="ID Flock Pattern: "+this.flockPatternID+"\n";

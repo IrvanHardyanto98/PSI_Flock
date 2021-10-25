@@ -33,9 +33,10 @@ public class AlgoPSI{
 	private int minEntityNum;
 	private int seedHash;
 	private int startTime;
+	private int endTime;
 	private HashMap<Integer,FlockPattern> patterns;
 	
-	public AlgoPSI(int startTime,int minEntityNum,double distTreshold,int minTimeInstance,int seedHash){
+	public AlgoPSI(int startTime,int endTime,int minEntityNum,double distTreshold,int minTimeInstance,int seedHash){
 	
 		this.FLOCK_PATTERN_ID = 1;
 		this.minEntityNum=minEntityNum;
@@ -44,6 +45,7 @@ public class AlgoPSI{
 		this.seedHash=seedHash;
 		this.patterns = new HashMap<>();
 		this.startTime=startTime;
+		this.endTime=endTime;
 	}
 	
 	public AlgoPSI(int minEntityNum,double distTreshold,int minTimeInstance,int seedHash){
@@ -64,7 +66,9 @@ public class AlgoPSI{
 	
 	public void findAllFlockPattern(Trajectory[] trajectories){
 		ArrayList<Location> locs = new ArrayList<>(trajectories.length);
-		for(int i = this.startTime;i <= (this.minTimeInstance+this.startTime-1);i++){
+		this.createDebugDir();
+		//for(int i = this.startTime;i <= (this.minTimeInstance+this.startTime-1);i++){
+		for(int i = this.startTime;i <= this.endTime;i++){
 			locs.clear();
 			long start = System.currentTimeMillis();
 			for(int j=0;j<trajectories.length;j++){
@@ -77,15 +81,43 @@ public class AlgoPSI{
 				System.out.println("Error! tidak ada catatan posisi pada waktu : "+i);
 				break;
 			}
-			//System.out.println("locs: "+locs.toString());
 			this.findAllFlockPattern(i, locs);
 			System.out.println("time: "+i+" done");
-			//System.out.println("durasi pencarian flock untuk waktu: "+i+" adalah: "+(System.currentTimeMillis()-start)+" milisekon");
 		}
 		this.countFlockPatternsByDuration(patterns);
 		//cari flock pattern yg durasinya gak kurang dari nilai tertentu
 		this.groupFlockPatternsByDuration(this.patterns);
 		filterFlockPatterns(this.patterns);
+	}
+	
+	public void findAllFlockPattern(Trajectory[] trajectories,int maxTime){
+		//cari lokasi pada setiap waktu..
+		//untuk file IPE
+		ArrayList<Location> locs = new ArrayList<>(trajectories.length);
+		this.createDebugDir();
+		//setelah baca jurnal, bagian ini kayaknya keliru
+		//for(int i = this.startTime;i <= (this.minTimeInstance+this.startTime-1);i++){
+		for(int i = 1;i <= maxTime;i++){
+			locs.clear();
+			long start = System.currentTimeMillis();
+			for(int j=0;j<trajectories.length;j++){
+				Location l = trajectories[j].getLocation(i);
+				if(l!=null){
+					locs.add(l);
+				}
+			}
+			if(locs.isEmpty()){
+				System.out.println("Error! tidak ada catatan posisi pada waktu : "+i);
+				break;
+			}
+			this.findAllFlockPattern(i, locs);
+			System.out.println("time: "+i+" done");
+		}
+		this.countFlockPatternsByDuration(patterns);
+		//cari flock pattern yg durasinya gak kurang dari nilai tertentu
+		this.groupFlockPatternsByDuration(this.patterns);
+		filterFlockPatterns(this.patterns);
+		
 	}
 	
 	private void countFlockPatternsByDuration(HashMap<Integer,FlockPattern> patterns){
@@ -103,58 +135,49 @@ public class AlgoPSI{
 		}
 		tw3.closeFile();
 	}
-	public void findAllFlockPattern(Trajectory[] trajectories,int maxTime){
-		//cari lokasi pada setiap waktu..
-		//untuk file IPE
-		ArrayList<Location> locs = new ArrayList<>(trajectories.length);
-		
-		
-		Path path = Paths.get("debugging/");
-		Path flocks = Paths.get("flocks/");
+	
+	private void createDebugDir(){
+		Path path = Paths.get("debugging"+File.separator);
+		Path flocks = Paths.get("flocks"+File.separator);
+		if(Files.exists(path)){
+			File folder = new File(path.toString());
+			File[] files = folder.listFiles();
+			for(File f: files){
+				f.delete();
+			}
+		}
+		if(Files.exists(flocks)){
+			File folder = new File(flocks.toString());
+			File[] files = folder.listFiles();
+			for(File f: files){
+				f.delete();
+			}
+		}
 		try {
 			Files.createDirectories(flocks);
 			Files.createDirectories(path);
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
-		//setelah baca jurnal, bagian ini kayaknya keliru
-		//for(int i = this.startTime;i <= (this.minTimeInstance+this.startTime-1);i++){
-		for(int i = 1;i <= maxTime;i++){
-			locs.clear();
-			long start = System.currentTimeMillis();
-			for(int j=0;j<trajectories.length;j++){
-				Location l = trajectories[j].getLocation(i);
-				if(l!=null){
-					locs.add(l);
-				}
-			}
-			if(locs.isEmpty()){
-				System.out.println("Error! tidak ada catatan posisi pada waktu : "+i);
-				break;
-			}
-			//System.out.println("locs: "+locs.toString());
-			this.findAllFlockPattern(i, locs);
-			System.out.println("time: "+i+" done");
-			//System.out.println("durasi pencarian flock untuk waktu: "+i+" adalah: "+(System.currentTimeMillis()-start)+" milisekon");
-		}
-		this.countFlockPatternsByDuration(patterns);
-		//cari flock pattern yg durasinya gak kurang dari nilai tertentu
-		this.groupFlockPatternsByDuration(this.patterns);
-		filterFlockPatterns(this.patterns);
-		
 	}
 	
 	private void groupFlockPatternsByDuration(HashMap<Integer,FlockPattern> patterns){
 		Path path = Paths.get("flocks-patterns-by-duration/");
-		try {
-			Files.createDirectories(path);
-		} catch (IOException ex) {
-			ex.printStackTrace();
+		if(Files.exists(path)){
+			File folder = new File(path.toString());
+			File[] files = folder.listFiles();
+			for(File f: files){
+				f.delete();
+			}
+		}else{
+			try {
+				Files.createDirectories(path);
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
 		}
-		//System.out.println("sukses buat direktori");
 		HashMap<Integer,ArrayList<FlockPattern>> res = new HashMap<>();
 		Iterator<Integer> iter = patterns.keySet().iterator();
-		//System.out.println("iter.hasNext IS: "+iter.hasNext());
 		while(iter.hasNext()){
 			FlockPattern fp = patterns.get(iter.next());
 			int duration = fp.getEndTime()-fp.getStartTime()+1;
@@ -164,14 +187,11 @@ public class AlgoPSI{
 				ArrayList<FlockPattern> a = new ArrayList<>();
 				a.add(fp);
 				res.put(duration,a);
-				//System.out.println("durasi: "+duration+" masih kosong");
 			}else{
-				//System.out.println("durasi: "+duration+" tambah");
 				res.get(duration).add(fp);
 			}
 		}
 		Iterator<Integer> iter2 = res.keySet().iterator();
-		//System.out.println("iter2.hasNext IS: "+iter2.hasNext());
 		while(iter2.hasNext()){
 			ArrayList<FlockPattern> t = res.get(iter2.next());
 			Iterator<FlockPattern> iter3 = t.iterator();
@@ -213,51 +233,34 @@ public class AlgoPSI{
 	* Method utama kelas AlgoPSI
 	**/
 	public void findAllFlockPattern(int timestamp,ArrayList<Location> locations){
+		try{
 		Location[] loc = new Location[locations.size()];
 		locations.toArray(loc);
 		ArrayList<MinimumBoundingRectangle> mbr = this.findCandidateFlock(timestamp,loc);
 		ArrayList<Flock> finalFlocks = this.filterFlocks(mbr);
-		
-		Path path = Paths.get("inverted_index"+File.separator);
-//		Path jf = Paths.get("debug-join-flock"+File.separator+("t-"+timestamp)+File.separator);
-				try {
-					Files.createDirectories(path);
-					//Files.createDirectories(jf);
-				} catch (IOException ex) {
-					ex.printStackTrace();
-				}
-				
+					
 		this.joinFlock(this.patterns,timestamp,finalFlocks);
+		
 	TXTWriter tw2 = new TXTWriter("flocks"+File.separator+"flocks_"+timestamp+".txt");
 		tw2.addLine("Final flocks at time: "+timestamp);
+		tw2.addLine(Integer.toString(finalFlocks.size()));
 		for(Flock f:finalFlocks){
-			boolean first=true;
 			String s="";
-			//System.out.print(f.toString());
-			tw2.addLine(f.toString());
-			for(Location l: f.getAllLocation()){
-				if(first){
-					first=false;
-				}else{
-					s+=",";
-				}
-				s+=l.getEntityID();
-			}
-			tw2.addLine(s);
+			tw2.addLine(f.getSimpleString());
 		}
 		tw2.closeFile();
-//		//System.out.println("Flock pattern pada waktu: "+timestamp+" adalah:");
 		TXTWriter tw = new TXTWriter("debugging"+File.separator+"fp_"+timestamp+".txt");
 		
 		
-		tw.addLine("Flock pattern pada waktu: "+timestamp+" adalah:");
+		tw.addLine(Integer.toString(this.patterns.size()));
 		Iterator<Integer> iter = this.patterns.keySet().iterator();
 		while(iter.hasNext()){
-			tw.addLine(this.patterns.get(iter.next()).toString());
-			tw.addBlankLine();
+			tw.addLine(this.patterns.get(iter.next()).getSimpleString());
 		}
 		tw.closeFile();
-		
+		}catch(OutOfMemoryError e){
+			e.printStackTrace();
+		}
 		
 	}
 	/**
@@ -270,7 +273,7 @@ public class AlgoPSI{
 		double y1=Double.MAX_VALUE;
 		double x2=Double.MIN_VALUE;
 		double y2=Double.MIN_VALUE;
-		
+
 		//KDTree tree = new KDTree();	
 		//tree.buildKDTree(locations);
 	
@@ -292,7 +295,7 @@ public class AlgoPSI{
 						
 						x2=Math.max(x2,ps.getX());
 						y2=Math.max(y2,ps.getY());
-
+						
 						P.add(ps);
 					}
 				}
@@ -345,9 +348,6 @@ public class AlgoPSI{
 			}
 			
 			xa=pr.getX();
-			//xb=xa;
-			
-			//yd=Math.abs(pr.getY()-p.getY())+Math.min(p.getY(),pr.getY());
 			
 			double dist=Math.sqrt((flockRadius*flockRadius)-Math.pow((ya-yb)/2.0,2));
 			xc1=xa-dist;
@@ -401,7 +401,6 @@ public class AlgoPSI{
 			
 			//hitung determinan (B^2-4AC)
 			double det=Math.sqrt((B*B)-(4.0*A*C));
-			//System.out.println("det: "+det);
 			//X1,2=(-b +- sqrt(D))/2a
 			xc1=(-1.0*B+det)/(2.0*A);
 			xc2=-1.0*(B+det)/(2.0*A);
@@ -415,10 +414,6 @@ public class AlgoPSI{
 		//setiap flock punya signature -> dihitung dari ID_Entitas
 		//artinya setiap nambahin satu 'titik' ke flock -> hitung binary signature.
 		
-		//System.out.println("\n xc1: "+xc1);
-		//System.out.println("yc1: "+yc1);
-		//System.out.println("xc2: "+xc2);
-		//System.out.println("yc2: "+yc2+"\n");
 		xc1 = this.roundValue(xc1);
 		yc1 = this.roundValue(yc1);
 
@@ -542,50 +537,33 @@ public class AlgoPSI{
 				this.addNewFlockPattern(flockPatterns,f,currTime);
 			}
 		}else{
-//			TXTWriter tw = new TXTWriter("inverted_index"+File.separator+"invIDx-"+(currTime-1)+".txt");
 			invertedIndex=this.buildInvertedIndex(flockPatterns,currTime-1);
-//			Iterator<Integer> itera= invertedIndex.keySet().iterator();
-//			while(itera.hasNext()){
-//				int id = itera.next();
-//				ArrayList<InvertedIndexValue> list = invertedIndex.get(id);
-//				tw.addLine("untuk key : "+id+" isi List nya adalah: ");
-//				for(InvertedIndexValue f:list){
-//					tw.addLine(f.toString());
-//				}
-//			}
-//			tw.closeFile();
 			HashSet<InvertedIndexValue> s1 = new HashSet<>();
 			//HashSet<InvertedIndexValue> s2 = new HashSet<>();
 			//System.out.println("inverted index pada waktu: "+(currTime-1)+" adalah: "+invertedIndex.toString());
 			HashMap<Integer,FlockPattern> latest=new HashMap<>();
+			HashSet<HashSet<Integer>> flockEntities = new HashSet<>();
 			for(int i=0;i<currFlocks.size();i++){
-				//TXTWriter tw2 = new TXTWriter("debug-join-flock"+File.separator+("t-"+currTime)+File.separator+"flock ke-"+i+".txt");
 				s1.clear();
 				Flock curr = currFlocks.get(i);
 				boolean noMatch = true;
 				//System.out.println("Flock saat ini yg (akan) disambung: "+curr.toString());
-				//tw2.addLine("Flock saat ini yg (akan) disambung: "+curr.toString());
-				//tw2.addBlankLine();
 				for(int j=0;j<curr.getAllLocation().size();j++){
 					Location loc = curr.getAllLocation().get(j);
 					//s2.clear();
 					ArrayList<InvertedIndexValue> flocks=invertedIndex.get(loc.getEntityID());
 					
 					if(flocks!=null){
-						//tw2.addLine("Kembalian dari inverted index adalah"+flocks.toString());
 					for(InvertedIndexValue f: flocks){
 						//System.out.println("isi entityIDSet milik curr adalah: "+curr.getEntityIDSet().toString());
 						//System.out.println("isi INTERSECTION "+f.countIntersection(curr.getEntityIDSet()));
 						int similar=f.countIntersection(curr.getEntityIDSet()).size();
 						if(similar>=this.minEntityNum){			
 							s1.add(f);
-							//tw2.addLine("entri baru ditambahkan, isi s1:" +s1.toString());
 						}
 					}}else{
-						//tw2.addLine("Kembalian dari inverted index adalah kosong");
 					}
 					//System.out.println("s2 berisi: "+s2.toString());
-					//tw2.addLine("s2 berisi: "+s2.toString());
 					//if(j==0){
 						//s1.addAll(s2);
 					//}else{
@@ -602,19 +580,23 @@ public class AlgoPSI{
 						FlockPattern fp=flockPatterns.get(patternID);
 						FlockPattern fpCopy = new FlockPattern(fp);
 						fpCopy.addFlock(new Flock(curr));
-						if(latest.containsKey(patternID)){
-							fpCopy.setID(this.FLOCK_PATTERN_ID);
-							latest.put(this.FLOCK_PATTERN_ID,fpCopy);
-							this.FLOCK_PATTERN_ID++;
+						HashSet<Integer> tmp = qf.countIntersection(curr.getEntityIDSet());
+						if(flockEntities.contains(tmp)){
+							continue;
 						}else{
-							latest.put(patternID,fpCopy);
+							flockEntities.add(tmp);
+							if(latest.containsKey(patternID)){
+								fpCopy.setID(this.FLOCK_PATTERN_ID);
+								latest.put(this.FLOCK_PATTERN_ID,fpCopy);
+								this.FLOCK_PATTERN_ID++;
+							}else{
+								latest.put(patternID,fpCopy);
+							}
 						}
 					}
 				}else{
-					//tw2.addLine("s2 kosong, flock ini jadi flock pattern baru");
 					this.addNewFlockPattern(latest,curr,currTime);
 				}
-				//tw2.closeFile();
 			}
 			if(!latest.isEmpty()){
 				//flockPatterns.clear();

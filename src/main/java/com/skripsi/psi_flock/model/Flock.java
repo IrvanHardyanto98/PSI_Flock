@@ -16,7 +16,7 @@ import java.util.Objects;
 public class Flock{
 	private static final int BITSTRING_LENGTH=2000;//error rate -> 0.009055
 	private ArrayList<Location> locations;
-	private HashSet<Integer> entitiyIDSet;
+	private HashSet<Integer> entityIDSet;
 	private int timestamp;
 	private int patternID;
 	private double radius;
@@ -36,7 +36,7 @@ public class Flock{
 		this.binarySignature=new BitSet(this.BITSTRING_LENGTH);//keyword new alokasi memori di heapSpace
 		this.centerPoint = new Point2D.Double(x,y);
 		this.locations = new ArrayList<>();
-		this.entitiyIDSet = new HashSet<>();
+		this.entityIDSet = new HashSet<>();
 		this.hasher=hasher;
 		this.patternID=0;
 	}
@@ -48,7 +48,7 @@ public class Flock{
 		this.binarySignature.or(other.binarySignature);
 		this.centerPoint = new Point2D.Double(other.centerPoint.getX(),other.centerPoint.getY());
 		this.locations = new ArrayList(other.locations);
-		this.entitiyIDSet = new HashSet(other.entitiyIDSet);
+		this.entityIDSet = new HashSet(other.entityIDSet);
 		this.hasher = other.hasher;
 		this.patternID = other.patternID;
 	}
@@ -64,7 +64,7 @@ public class Flock{
 	//jangan lupa hitung binary signature nya;
 	public void addLocation(Location loc){
 		this.locations.add(loc);
-		this.entitiyIDSet.add(loc.getEntityID());
+		this.entityIDSet.add(loc.getEntityID());
 		long spookyHashVal = this.hasher.doSpookyHash(loc.getEntityID());
 		long murHashVal = this.hasher.doMurMurHash(loc.getEntityID());
 		this.binarySignature.set((int)(spookyHashVal%this.BITSTRING_LENGTH));
@@ -94,7 +94,7 @@ public class Flock{
 	}
 	
 	public HashSet<Integer> getEntityIDSet(){
-		return this.entitiyIDSet;
+		return this.entityIDSet;
 	}
 	//hitung irisan ID entitas, (bedakan dengan method countIntersections yg berbasis posisi)
 	public HashSet<Integer> countEntityIDIntersection(Flock other){
@@ -104,7 +104,7 @@ public class Flock{
 			//a.retainAll(new HashSet<>(other.getEntityIDSet()));
 		//}else{
 			a = new HashSet<>(other.getEntityIDSet());
-			a.retainAll(this.entitiyIDSet);
+			a.retainAll(this.entityIDSet);
 		//}
 		return a;
 	}
@@ -148,7 +148,7 @@ public class Flock{
 		this.countSignature();
 		for(int i=0;i<locations.size();i++){
 			Location loc = locations.get(i);
-			this.entitiyIDSet.add(loc.getEntityID());
+			this.entityIDSet.add(loc.getEntityID());
 		}
 	}
 	
@@ -181,7 +181,22 @@ public class Flock{
 		s+="jumlah titik pada flock: "+this.locations.size()+"\n";
 		s+="titik-titik dalam flock adalah:";
 		boolean f =true;
-		for(Integer id:entitiyIDSet){
+		for(Integer id:entityIDSet){
+			if(f){
+				f=false;
+			}else{
+				s+=",";
+			}
+			s+=id;
+		}
+		s+="\n";
+		return s;
+	}
+	
+	public String getSimpleString(){
+		String s ="("+this.centerPoint.getX()+","+this.centerPoint.getY()+"),"+this.radius+"\n";
+		boolean f =true;
+		for(Integer id:entityIDSet){
 			if(f){
 				f=false;
 			}else{

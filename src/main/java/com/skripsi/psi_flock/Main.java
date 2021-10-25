@@ -60,11 +60,14 @@ public class Main {
 		int seed = 0;
 		double distTreshold = 0.0;
 		int startTime = 0;
+		int endTime = 0;
 		System.out.println("Masukkan Parameter Pencarian");
 		System.out.print("Masukkan jumlah entitas minimal: ");
 		minEntityNum = sc.nextInt();
-		System.out.print("Masukkan waktu mulai: ");
-		startTime = sc.nextInt();
+		//System.out.print("Masukkan waktu mulai: ");
+		//startTime = sc.nextInt();
+		//System.out.print("Masukkan waktu akhir: ");
+		//endTime = sc.nextInt();
 		System.out.print("Masukkan durasi minimal flock: ");
 		minDuration = sc.nextInt();
 		System.out.print("Masukkan batasan jarak: ");
@@ -73,8 +76,8 @@ public class Main {
 		seed = 1546789124;
 		sc.nextLine();
 
-		AlgoPSI problemInstance = new AlgoPSI(startTime,minEntityNum, distTreshold, minDuration, seed);
-		//AlgoPSI problemInstance = new AlgoPSI(minEntityNum, distTreshold, minDuration, seed);
+		//AlgoPSI problemInstance = new AlgoPSI(startTime,endTime,minEntityNum, distTreshold, minDuration, seed);
+		AlgoPSI problemInstance = new AlgoPSI(minEntityNum, distTreshold, minDuration, seed);
 		int entityID;
 		int timestamp = 0;
 		double x;
@@ -99,8 +102,8 @@ public class Main {
 		LocalDateTime startDate = LocalDateTime.now(ZoneId.of("Asia/Jakarta"));
 
 		System.out.println("MAX TIME INSTANCE IS: "+maxTime);
-		//problemInstance.findAllFlockPattern(trajectories,maxTime);
-		problemInstance.findAllFlockPattern(trajectories);
+		problemInstance.findAllFlockPattern(trajectories,maxTime);
+		//problemInstance.findAllFlockPattern(trajectories);
 		long end = System.currentTimeMillis();
 		totalTime += (end - start);
 		

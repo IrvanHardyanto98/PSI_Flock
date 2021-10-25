@@ -74,4 +74,8 @@ public class Location{
 		s+= "posisi ("+this.position.getX()+","+this.position.getY()+")\n\n";
 		return s;
 	}
+	
+	public String getSimpleString(){
+		return this.entityID+","+this.timestamp+","+this.position.getX()+","+this.position.getY();
+	}
 }
