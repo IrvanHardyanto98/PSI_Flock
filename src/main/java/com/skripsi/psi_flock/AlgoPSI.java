@@ -221,7 +221,7 @@ public class AlgoPSI{
 			int duration = curr.getEndTime()-curr.getStartTime()+1;
 			maxDuration = Math.max(maxDuration,duration);
 			//if(duration >= this.minTimeInstance&&(curr.getEntityNum()>=2 && curr.getEntityNum()<=7)){
-			if(duration >= this.minTimeInstance){
+			if(duration == this.minTimeInstance){
 				temp.put(currID,curr);
 				//this.patterns.remove(currID);
 			}
