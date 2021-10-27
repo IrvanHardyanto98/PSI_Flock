@@ -34,6 +34,7 @@ public class AlgoPSI{
 	private int seedHash;
 	private int startTime;
 	private int endTime;
+	private String rootDir;
 	private HashMap<Integer,FlockPattern> patterns;
 	
 	public AlgoPSI(int startTime,int endTime,int minEntityNum,double distTreshold,int minTimeInstance,int seedHash){
@@ -66,7 +67,7 @@ public class AlgoPSI{
 	
 	public void findAllFlockPattern(Trajectory[] trajectories){
 		ArrayList<Location> locs = new ArrayList<>(trajectories.length);
-		this.createDebugDir();
+		//this.createDebugDir();
 		//for(int i = this.startTime;i <= (this.minTimeInstance+this.startTime-1);i++){
 		for(int i = this.startTime;i <= this.endTime;i++){
 			locs.clear();
@@ -91,12 +92,8 @@ public class AlgoPSI{
 	}
 	
 	public void findAllFlockPattern(Trajectory[] trajectories,int maxTime){
-		//cari lokasi pada setiap waktu..
-		//untuk file IPE
 		ArrayList<Location> locs = new ArrayList<>(trajectories.length);
-		this.createDebugDir();
-		//setelah baca jurnal, bagian ini kayaknya keliru
-		//for(int i = this.startTime;i <= (this.minTimeInstance+this.startTime-1);i++){
+		//this.createDebugDir();
 		for(int i = 1;i <= maxTime;i++){
 			locs.clear();
 			long start = System.currentTimeMillis();
@@ -129,53 +126,70 @@ public class AlgoPSI{
 			arrayOfDurations[fp.getEndTime()-fp.getStartTime()+1]++;
 		}
 		
-		TXTWriter tw3 = new TXTWriter("jumlah_flock_pattern_berdasarkan durasi.txt");
+		TXTWriter tw3 = new TXTWriter(this.rootDir+"jumlah_flock_pattern_berdasarkan durasi.txt");
 		for(int i = 0; i < arrayOfDurations.length;i++){
 			tw3.addLine("Jml flock pattern dengan durasi : "+i+" adalah: "+arrayOfDurations[i]+" buah\n");
 		}
 		tw3.closeFile();
 	}
 	
-	private void createDebugDir(){
-		Path path = Paths.get("debugging"+File.separator);
-		Path flocks = Paths.get("flocks"+File.separator);
-		if(Files.exists(path)){
-			File folder = new File(path.toString());
-			File[] files = folder.listFiles();
-			for(File f: files){
-				f.delete();
-			}
-		}
-		if(Files.exists(flocks)){
-			File folder = new File(flocks.toString());
-			File[] files = folder.listFiles();
-			for(File f: files){
-				f.delete();
-			}
-		}
+	public void createDebugDir(String inputFileName){
+		inputFileName = inputFileName.substring(0,inputFileName.length()-4);
+		this.rootDir=inputFileName+File.separator+this.startTime+"-"+this.endTime+File.separator;
+		Path root = Paths.get(this.rootDir);
+		if(Files.exists(root)){
+			this.deleteDirRecursively(new File(root.toString()));
+		}else{
+//		if(Files.exists(path)){
+//			File folder = new File(path.toString());
+//			File[] files = folder.listFiles();
+//			for(File f: files){
+//				f.delete();
+//			}
+//		}
+//		if(Files.exists(flocks)){
+//			File folder = new File(flocks.toString());
+//			File[] files = folder.listFiles();
+//			for(File f: files){
+//				f.delete();
+//			}
+//		}
+//		if(Files.exists(flockPatterns)){
+//			File folder = new File(flockPatterns.toString());
+//			File[] files = folder.listFiles();
+//			for(File f: files){
+//				f.delete();
+//			}
+//		}
+		Path flockPatterns = Paths.get(this.rootDir+"flocks-patterns-by-duration"+File.separator);
+		Path path = Paths.get(this.rootDir+"debugging"+File.separator);
+		Path flocks = Paths.get(this.rootDir+"flocks"+File.separator);
 		try {
+			Files.createDirectories(root);
 			Files.createDirectories(flocks);
 			Files.createDirectories(path);
+			Files.createDirectories(flockPatterns);
 		} catch (IOException ex) {
 			ex.printStackTrace();
+		}
+		}
+	}
+	
+	private void deleteDirRecursively(File f){
+		if(f.isDirectory()){
+			File[] content = f.listFiles();
+			for(File item: content){
+				deleteDirRecursively(item);
+			}
+		}else{
+			String fileFormat = f.getName().substring(f.getName().length()-3);
+			if(fileFormat.equals("txt")){
+				f.delete();
+			}
 		}
 	}
 	
 	private void groupFlockPatternsByDuration(HashMap<Integer,FlockPattern> patterns){
-		Path path = Paths.get("flocks-patterns-by-duration/");
-		if(Files.exists(path)){
-			File folder = new File(path.toString());
-			File[] files = folder.listFiles();
-			for(File f: files){
-				f.delete();
-			}
-		}else{
-			try {
-				Files.createDirectories(path);
-			} catch (IOException ex) {
-				ex.printStackTrace();
-			}
-		}
 		HashMap<Integer,ArrayList<FlockPattern>> res = new HashMap<>();
 		Iterator<Integer> iter = patterns.keySet().iterator();
 		while(iter.hasNext()){
@@ -198,7 +212,7 @@ public class AlgoPSI{
 			
 			FlockPattern temp = iter3.next();
 			int d = temp.getEndTime()-temp.getStartTime()+1;
-			TXTWriter tw = new TXTWriter("flocks-patterns-by-duration"+File.separator+"durasi-"+d+".txt");
+			TXTWriter tw = new TXTWriter(this.rootDir+"flocks-patterns-by-duration"+File.separator+"durasi-"+d+".txt");
 			tw.addLine(Integer.toString(t.size()));
 			
 			
@@ -241,7 +255,7 @@ public class AlgoPSI{
 					
 		this.joinFlock(this.patterns,timestamp,finalFlocks);
 		
-	TXTWriter tw2 = new TXTWriter("flocks"+File.separator+"flocks_"+timestamp+".txt");
+	TXTWriter tw2 = new TXTWriter(this.rootDir+"flocks"+File.separator+"flocks_"+timestamp+".txt");
 		tw2.addLine("Final flocks at time: "+timestamp);
 		tw2.addLine(Integer.toString(finalFlocks.size()));
 		for(Flock f:finalFlocks){
@@ -249,7 +263,7 @@ public class AlgoPSI{
 			tw2.addLine(f.getSimpleString());
 		}
 		tw2.closeFile();
-		TXTWriter tw = new TXTWriter("debugging"+File.separator+"fp_"+timestamp+".txt");
+		TXTWriter tw = new TXTWriter(this.rootDir+"debugging"+File.separator+"fp_"+timestamp+".txt");
 		
 		
 		tw.addLine(Integer.toString(this.patterns.size()));
