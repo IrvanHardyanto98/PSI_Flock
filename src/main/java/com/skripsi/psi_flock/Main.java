@@ -68,7 +68,7 @@ public class Main {
 		//startTime = sc.nextInt();
 		//System.out.print("Masukkan waktu akhir: ");
 		//endTime = sc.nextInt();
-		System.out.print("Masukkan durasi minimal flock: ");
+		System.out.print("Masukkan durasi flock: ");
 		minDuration = sc.nextInt();
 		System.out.print("Masukkan batasan jarak: ");
 		distTreshold = sc.nextDouble();
