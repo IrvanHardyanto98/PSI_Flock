@@ -64,20 +64,20 @@ public class Main {
 		System.out.println("Masukkan Parameter Pencarian");
 		System.out.print("Masukkan jumlah entitas minimal: ");
 		minEntityNum = sc.nextInt();
-		//System.out.print("Masukkan waktu mulai: ");
-		//startTime = sc.nextInt();
-		//System.out.print("Masukkan waktu akhir: ");
-		//endTime = sc.nextInt();
-		System.out.print("Masukkan durasi flock: ");
-		minDuration = sc.nextInt();
+		System.out.print("Masukkan waktu mulai: ");
+		startTime = sc.nextInt();
+		System.out.print("Masukkan waktu akhir: ");
+		endTime = sc.nextInt();
+		System.out.print("Masukkan durasi minimal flock: ");
+		minDuration = sc.nextInt();//ini masih jadi perdebatan nih...
 		System.out.print("Masukkan batasan jarak: ");
 		distTreshold = sc.nextDouble();
 		//System.out.print("Masukkan nilai seed: ");
 		seed = 1546789124;
 		sc.nextLine();
 
-		//AlgoPSI problemInstance = new AlgoPSI(startTime,endTime,minEntityNum, distTreshold, minDuration, seed);
-		AlgoPSI problemInstance = new AlgoPSI(minEntityNum, distTreshold, minDuration, seed);
+		AlgoPSI problemInstance = new AlgoPSI(startTime,endTime,minEntityNum, distTreshold, minDuration, seed);
+		//AlgoPSI problemInstance = new AlgoPSI(minEntityNum, distTreshold, minDuration, seed);
 		int entityID;
 		int timestamp = 0;
 		double x;
@@ -88,7 +88,7 @@ public class Main {
 		System.out.print("\nMasukkan nama file: ");
 
 		fileName = sc.nextLine();
-		System.out.print("\nPencarian flock pada interval waktu ["+startTime+","+(startTime+minDuration-1)+"] dimulai");
+		System.out.print("\nPencarian flock pada interval waktu ["+startTime+","+endTime+"] dimulai");
 
 		
 
@@ -101,18 +101,19 @@ public class Main {
 		
 		LocalDateTime startDate = LocalDateTime.now(ZoneId.of("Asia/Jakarta"));
 
-		System.out.println("MAX TIME INSTANCE IS: "+maxTime);
-		problemInstance.findAllFlockPattern(trajectories,maxTime);
-		//problemInstance.findAllFlockPattern(trajectories);
+		System.out.println("Waktu maksimal pada data yang dimasukan adalah: "+maxTime);
+		//problemInstance.findAllFlockPattern(trajectories,maxTime);
+		problemInstance.createDebugDir(fileName);
+		problemInstance.findAllFlockPattern(trajectories);
 		long end = System.currentTimeMillis();
 		totalTime += (end - start);
 		
 		HashMap<Integer, FlockPattern> patterns = problemInstance.getAllFlockPattern();
-		
-		TXTWriter tw = new TXTWriter(fileName.split("\\.")[0]+"-"+minEntityNum+"-"+distTreshold+"-"+minDuration+".txt");
+
+		TXTWriter tw = new TXTWriter(fileName.split("\\.")[0]+"-"+minEntityNum+"-"+minDuration+"-"+distTreshold+"("+startTime+"-"+endTime+")"+File.separator+fileName.split("\\.")[0]+"-"+minEntityNum+"-"+minDuration+"-"+distTreshold+"("+startTime+"-"+endTime+").txt");
 		tw.addLine(Integer.toString(patterns.size()));
 		
-		PDFWriter pw = new PDFWriter("FlockPatterns-REV02"+fileName+"-"+minEntityNum+",("+startTime+","+(startTime+minDuration-1)+"),"+distTreshold+".pdf", "Pencarian Flock Pattern Menggunakan Algortima PSI");
+		PDFWriter pw = new PDFWriter(fileName.split("\\.")[0]+"-"+minEntityNum+"-"+minDuration+"-"+distTreshold+"("+startTime+"-"+endTime+")"+File.separator+"FlockPatterns-REV02"+fileName+"-"+minEntityNum+",("+startTime+","+(startTime+minDuration-1)+"),"+distTreshold+".pdf", "Pencarian Flock Pattern Menggunakan Algortima PSI");
 		pw.addParagraph("Ringkasan Hasil Pencarian");
 		String[][] runAttr = new String[4][2];
 		
@@ -139,7 +140,6 @@ public class Main {
 		pw.addTable(params);
 		pw.addBlankLine();
 
-		pw.addParagraph("Flock Pattern yang ditemukan: ");
 		Set<Integer> keys = patterns.keySet();
 		Iterator<Integer> iter = keys.iterator();
 
@@ -159,17 +159,14 @@ public class Main {
 			
 			
 			String txtOutput="";
-			s+="Entitas-entitas yang berada di dalam flock pattern adalah: ";
 			boolean first=true;
 			while(iter2.hasNext()){
 				if(first){
 					first=false;
 				}else{
-					s+=",";
 					txtOutput+=" ";
 				}
 				Integer eID = iter2.next();
-				s+=eID;
 				txtOutput+=eID;
 			}
 			tw.addLine(txtOutput);
