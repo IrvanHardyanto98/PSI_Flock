@@ -26,6 +26,8 @@ hs_err_pid*
 *.pdf
 *.ipe
 *.csv
+*.starkey
+*.ggb
 hasil percobaan/
 testcase/
 

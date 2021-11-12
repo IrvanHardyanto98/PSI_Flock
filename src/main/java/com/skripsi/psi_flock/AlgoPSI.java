@@ -85,7 +85,7 @@ public class AlgoPSI{
 			this.findAllFlockPattern(i, locs);
 			System.out.println("time: "+i+" done");
 		}
-		this.countFlockPatternsByDuration(patterns);
+		//this.countFlockPatternsByDuration(patterns);
 		//cari flock pattern yg durasinya gak kurang dari nilai tertentu
 		this.groupFlockPatternsByDuration(this.patterns);
 		filterFlockPatterns(this.patterns);
@@ -110,7 +110,7 @@ public class AlgoPSI{
 			this.findAllFlockPattern(i, locs);
 			System.out.println("time: "+i+" done");
 		}
-		this.countFlockPatternsByDuration(patterns);
+		//this.countFlockPatternsByDuration(patterns);
 		//cari flock pattern yg durasinya gak kurang dari nilai tertentu
 		this.groupFlockPatternsByDuration(this.patterns);
 		filterFlockPatterns(this.patterns);
@@ -135,7 +135,7 @@ public class AlgoPSI{
 	
 	public void createDebugDir(String inputFileName){
 		inputFileName = inputFileName.substring(0,inputFileName.length()-4);
-		this.rootDir=inputFileName+File.separator+this.startTime+"-"+this.endTime+File.separator;
+		this.rootDir=inputFileName+"-"+this.minEntityNum+"-"+this.minTimeInstance+"-"+this.distTreshold+File.separator+this.startTime+"-"+this.endTime+File.separator;
 		Path root = Paths.get(this.rootDir);
 		if(Files.exists(root)){
 			this.deleteDirRecursively(new File(root.toString()));
@@ -166,8 +166,8 @@ public class AlgoPSI{
 		Path flocks = Paths.get(this.rootDir+"flocks"+File.separator);
 		try {
 			Files.createDirectories(root);
-			Files.createDirectories(flocks);
-			Files.createDirectories(path);
+			//Files.createDirectories(flocks);
+			//Files.createDirectories(path);
 			Files.createDirectories(flockPatterns);
 		} catch (IOException ex) {
 			ex.printStackTrace();
@@ -234,10 +234,8 @@ public class AlgoPSI{
 			FlockPattern curr = patterns.get(currID);
 			int duration = curr.getEndTime()-curr.getStartTime()+1;
 			maxDuration = Math.max(maxDuration,duration);
-			//if(duration >= this.minTimeInstance&&(curr.getEntityNum()>=2 && curr.getEntityNum()<=7)){
-			if(duration == this.minTimeInstance){
+			if(duration >= this.minTimeInstance){
 				temp.put(currID,curr);
-				//this.patterns.remove(currID);
 			}
 		}
 		patterns.clear();
@@ -255,23 +253,23 @@ public class AlgoPSI{
 					
 		this.joinFlock(this.patterns,timestamp,finalFlocks);
 		
-	TXTWriter tw2 = new TXTWriter(this.rootDir+"flocks"+File.separator+"flocks_"+timestamp+".txt");
-		tw2.addLine("Final flocks at time: "+timestamp);
-		tw2.addLine(Integer.toString(finalFlocks.size()));
-		for(Flock f:finalFlocks){
-			String s="";
-			tw2.addLine(f.getSimpleString());
-		}
-		tw2.closeFile();
-		TXTWriter tw = new TXTWriter(this.rootDir+"debugging"+File.separator+"fp_"+timestamp+".txt");
-		
-		
-		tw.addLine(Integer.toString(this.patterns.size()));
-		Iterator<Integer> iter = this.patterns.keySet().iterator();
-		while(iter.hasNext()){
-			tw.addLine(this.patterns.get(iter.next()).getSimpleString());
-		}
-		tw.closeFile();
+//	TXTWriter tw2 = new TXTWriter(this.rootDir+"flocks"+File.separator+"flocks_"+timestamp+".txt");
+//		tw2.addLine("Final flocks at time: "+timestamp);
+//		tw2.addLine(Integer.toString(finalFlocks.size()));
+//		for(Flock f:finalFlocks){
+//			String s="";
+//			tw2.addLine(f.getSimpleString());
+//		}
+//		tw2.closeFile();
+//		TXTWriter tw = new TXTWriter(this.rootDir+"debugging"+File.separator+"fp_"+timestamp+".txt");
+//		
+//		
+//		tw.addLine(Integer.toString(this.patterns.size()));
+//		Iterator<Integer> iter = this.patterns.keySet().iterator();
+//		while(iter.hasNext()){
+//			tw.addLine(this.patterns.get(iter.next()).getSimpleString());
+//		}
+//		tw.closeFile();
 		}catch(OutOfMemoryError e){
 			e.printStackTrace();
 		}

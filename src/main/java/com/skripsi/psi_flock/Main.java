@@ -99,8 +99,8 @@ public class Main {
 		System.out.println("Waktu MAKSIMAL pada data lintasan: " + maxTime);
 		System.out.println("\nBanyaknya interval waktu: " + maxTime + "/" + panjangInterval + " : " + intervalNum);
 		for (int i = 1; i <= intervalNum; i++) {
-			startTime = (panjangInterval * (i - 1)) + 1;
-			endTime = (panjangInterval * i);
+			startTime = 1;
+			endTime = (i*panjangInterval);
 			System.out.println("Pencarian pada Interval waktu : [" + startTime + "," + endTime + "] dimulai");
 
 			AlgoPSI problemInstance = new AlgoPSI(startTime, endTime, minEntityNum, distTreshold, minDuration, seed);
