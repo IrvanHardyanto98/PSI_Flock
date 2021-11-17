@@ -157,7 +157,7 @@ public class AlgoPSI{
 				Files.createDirectories(flocks);
 				Files.createDirectories(path);
 				Files.createDirectories(flockPatterns);
-				//Files.createDirectories(fps);
+				Files.createDirectories(fps);
 			} catch (IOException ex) {
 				ex.printStackTrace();
 			}
@@ -281,14 +281,19 @@ public class AlgoPSI{
 
 		//KDTree tree = new KDTree();	
 		//tree.buildKDTree(locations);
-		
+		Path fps = Paths.get(this.rootDir+"fps"+File.separator+"waktu-"+timestamp+File.separator);
+			try {
+				Files.createDirectories(fps);
+			}catch(IOException e){
+				e.printStackTrace();
+			}
 		ArrayList<Location> P=new ArrayList(this.P_SIZE);	
 		Arrays.sort(locations,new LocationComparatorX());
 		
 		for(Location pr: locations){
 			P.clear();
-			//TXTWriter tw = new TXTWriter(this.rootDir+"fps"+File.separator+"waktu-"+timestamp+File.separator+"pr-"+pr.getX()+","+pr.getY()+".txt");
-			//tw.addLine("first phase");
+			TXTWriter tw = new TXTWriter(this.rootDir+"fps"+File.separator+"waktu-"+timestamp+File.separator+"pr-"+pr.getX()+","+pr.getY()+".txt");
+			tw.addLine("first phase");
 			x1=Double.MAX_VALUE;
 			y1=Double.MAX_VALUE;
 			x2=Double.MIN_VALUE;
@@ -304,28 +309,30 @@ public class AlgoPSI{
 						y2=Math.max(y2,ps.getY());
 						
 						P.add(ps);
-						//tw.addLine(ps.getSimpleString());
+						tw.addLine(ps.getSimpleString());
 					}
 				}
 			}
 			
 			MinimumBoundingRectangle mbr = new MinimumBoundingRectangle(pr.getPosition(),timestamp,
 					new Point2D.Double(x1,y1),new Point2D.Double(x2,y2));
-			//tw.addLine(Integer.toString(P.size()));
-			//tw.addLine("second phase");
+			tw.addLine(Integer.toString(P.size()));
+			tw.addLine("second phase");
 			for(int i = 0 ; i < P.size();i++){
 				Location p = P.get(i);
 				if(p.equals(pr)||p.getX()<pr.getX()){
 				//if(p.equals(pr)){
 					continue;
 				}else if(dist(p.getX(),p.getY(),pr.getX(),pr.getY())<=this.distTreshold){
-					//tw.addLine(p.getSimpleString());
+					tw.addLine(p.getSimpleString());
 					//Flock[] flocks=this.countFlock(timestamp,pr.getPosition(),p.getPosition(),tree);
 					Flock[] flocks=this.countFlock(timestamp,pr.getPosition(),p.getPosition(),locations);
-					//tw.addLine("FlockPatterns formed by pr and p");
+					tw.addLine("FlockPatterns formed by pr and p");
 					for(Flock c: flocks){
+						tw.addLine(c.getSimpleString());
 						int intersectNum = c.countIntersections(P);
 						if(intersectNum >= this.minEntityNum){
+							tw.addLine("added to mbr");
 							mbr.addFlock(c);
 						}
 					}
@@ -335,7 +342,7 @@ public class AlgoPSI{
 			if(mbr.getAllFlock().size()>0){
 				activeBoxes.add(mbr);
 			}
-			//tw.closeFile();
+			tw.closeFile();
 		}
 		return activeBoxes;
 	}
@@ -509,12 +516,14 @@ public class AlgoPSI{
 			temp.and(d.getBinarySignature());
 
 			if(temp.equals(cSign) && currFlock.dist(d)<=this.distTreshold){
-				if(d.intersect(currFlock).equals(currFlock.getAllLocation())){
+				if(d.countEntityIDIntersection(currFlock).equals(currFlock.getEntityIDSet())){
+				//if(d.intersect(currFlock).equals(currFlock.getAllLocation())){
 				//if(customEquals(d.intersect(currFlock), currFlock.getAllLocation())){
 					return;
 				}
 			}else if(temp.equals(dSign)){
-				if(currFlock.intersect(d).equals(d.getAllLocation())){
+				if(currFlock.countEntityIDIntersection(d).equals(d.getEntityIDSet())){
+				//if(currFlock.intersect(d).equals(d.getAllLocation())){
 				//if(customEquals(currFlock.intersect(d), d.getAllLocation())){
 					//flocks.remove(d);//hapus flock pada posisi ke-i
 					iter.remove();
