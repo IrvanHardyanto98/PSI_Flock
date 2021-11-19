@@ -562,7 +562,7 @@ public class AlgoPSI{
 		}else{
 			invertedIndex=this.buildInvertedIndex(flockPatterns,currTime-1);
 			HashSet<InvertedIndexValue> s1 = new HashSet<>();
-			//HashSet<InvertedIndexValue> s2 = new HashSet<>();
+			HashSet<InvertedIndexValue> s2 = new HashSet<>();
 			//System.out.println("inverted index pada waktu: "+(currTime-1)+" adalah: "+invertedIndex.toString());
 			HashMap<Integer,FlockPattern> latest=new HashMap<>();
 			HashSet<HashSet<Integer>> flockEntities = new HashSet<>();
@@ -573,7 +573,7 @@ public class AlgoPSI{
 				//System.out.println("Flock saat ini yg (akan) disambung: "+curr.toString());
 				for(int j=0;j<curr.getAllLocation().size();j++){
 					Location loc = curr.getAllLocation().get(j);
-					//s2.clear();
+					s2.clear();
 					ArrayList<InvertedIndexValue> flocks=invertedIndex.get(loc.getEntityID());
 					
 					if(flocks!=null){
@@ -581,17 +581,18 @@ public class AlgoPSI{
 						//System.out.println("isi entityIDSet milik curr adalah: "+curr.getEntityIDSet().toString());
 						//System.out.println("isi INTERSECTION "+f.countIntersection(curr.getEntityIDSet()));
 						int similar=f.countIntersection(curr.getEntityIDSet()).size();
-						if(similar>=this.minEntityNum){			
-							s1.add(f);
+						if(similar>=this.minEntityNum){
+							//s1.add(f);
+							s2.add(f);
 						}
 					}}else{
 					}
 					//System.out.println("s2 berisi: "+s2.toString());
-					//if(j==0){
-						//s1.addAll(s2);
-					//}else{
-						//s1.retainAll(s2);
-					//}
+					if(j==0){
+						s1.addAll(s2);
+					}else{
+						s1.retainAll(s2);
+					}
 				}
 				//System.out.println("s1 berisi: "+s1.toString());
 				
@@ -603,6 +604,8 @@ public class AlgoPSI{
 						FlockPattern fp=flockPatterns.get(patternID);
 						FlockPattern fpCopy = new FlockPattern(fp);
 						fpCopy.addFlock(new Flock(curr));
+						
+						
 						HashSet<Integer> tmp = qf.countIntersection(curr.getEntityIDSet());
 						if(flockEntities.contains(tmp)){
 							continue;
